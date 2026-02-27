@@ -23,6 +23,11 @@ sys.modules['google.generativeai'] = MagicMock()
 sys.modules['bs4'] = MagicMock()
 
 # Import create_app after mocks
+# Ensure REQUIRED env vars are present before config evaluation
+os.environ['SECRET_KEY'] = 'test-secret-key'
+os.environ['JWT_SECRET'] = 'test-jwt-secret'
+os.environ['GOOGLE_DEFAULT_COOKIE'] = 'test-cookie'
+
 from apps import create_app, database
 
 class TestSecurityConfig(unittest.TestCase):
