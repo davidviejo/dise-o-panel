@@ -1,1 +1,19 @@
-[]
+[
+  {
+    "slug": "demo-project",
+    "name": "Diego Casas",
+    "status": "active",
+    "description": "A demo project.",
+    "project_password_hash": "$2b$12$"
+  }
+]
+
+[
+  {
+    "slug": "1",
+    "name": "Vericat",
+    "status": "active",
+    "description": "A demo project.",
+    "project_password_hash": "$2b$12$"
+  }
+]
