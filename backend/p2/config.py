@@ -29,3 +29,7 @@ class Config:
     CLIENTS_AREA_PASSWORD = os.environ.get('CLIENTS_AREA_PASSWORD')
     OPERATOR_PASSWORD = os.environ.get('OPERATOR_PASSWORD')
     JWT_SECRET = os.environ.get('JWT_SECRET') or secrets.token_hex(32)
+
+    # Job Runner Configuration
+    JOBS_CONCURRENCY_LIMIT = int(os.environ.get('JOBS_CONCURRENCY_LIMIT', 2))
+    JOBS_POLL_INTERVAL = int(os.environ.get('JOBS_POLL_INTERVAL', 5))

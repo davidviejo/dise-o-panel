@@ -11,10 +11,7 @@ from apps.database import (
     update_item_status, update_job_progress, get_job
 )
 from apps.api_engine.seo_checklist_orchestrator import run_orchestrated_checklist
-
-# Configuration
-MAX_CONCURRENT_ITEMS = 2  # Low concurrency as requested
-POLL_INTERVAL = 5 # Seconds
+from config import Config
 
 _RUNNER_STARTED = False
 _RUNNER_LOCK = threading.Lock()
@@ -44,10 +41,10 @@ class JobRunner:
                 if job:
                     JobRunner.process_job(job)
                 else:
-                    time.sleep(POLL_INTERVAL)
+                    time.sleep(Config.JOBS_POLL_INTERVAL)
             except Exception as e:
                 logging.error(f"Error in JobRunner loop: {e}")
-                time.sleep(POLL_INTERVAL)
+                time.sleep(Config.JOBS_POLL_INTERVAL)
 
     @staticmethod
     def process_job(job: Dict[str, Any]):
@@ -84,7 +81,8 @@ class JobRunner:
             cancel_flag = False
 
             # Use ThreadPoolExecutor for concurrent items
-            with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_CONCURRENT_ITEMS) as executor:
+            max_workers = Config.JOBS_CONCURRENCY_LIMIT
+            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
                 pending_items = list(items)
                 active_futures = []
 
@@ -102,11 +100,11 @@ class JobRunner:
 
                     if current_job['status'] == 'paused':
                         logging.info(f"Job {job_id} paused. Waiting...")
-                        time.sleep(POLL_INTERVAL)
+                        time.sleep(Config.JOBS_POLL_INTERVAL)
                         continue
 
                     # Submit new tasks if slots available
-                    while len(active_futures) < MAX_CONCURRENT_ITEMS and pending_items:
+                    while len(active_futures) < max_workers and pending_items:
                         item = pending_items.pop(0)
                         future = executor.submit(JobRunner.process_single_item, item, config, gsc_queries_map, advanced_allowed)
                         active_futures.append(future)
