@@ -81,6 +81,15 @@ export const api = {
     return res.json();
   },
 
+  getPublicClients: async () => {
+    const res = await fetch(`${API_URL}/api/public/clients`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) throw new Error('Failed to fetch public clients');
+    return res.json();
+  },
+
   getProjectOverview: async (slug: string) => {
     const res = await fetch(`${API_URL}/api/${slug}/overview`, {
       headers: api.getHeaders(),
