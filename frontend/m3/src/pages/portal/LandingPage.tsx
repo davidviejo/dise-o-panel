@@ -1,9 +1,34 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Linkedin, Twitter, Globe, CheckCircle } from 'lucide-react';
+import { Linkedin, Twitter, Globe, CheckCircle, FolderOpen } from 'lucide-react';
+import { api } from '../../services/api';
+import { Spinner } from '../../components/ui/Spinner';
+
+interface Client {
+  slug: string;
+  name: string;
+  status: string;
+  description: string;
+}
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const data = await api.getPublicClients();
+        setClients(data);
+      } catch (err) {
+        console.error('Error fetching public clients:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchClients();
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-orange-500 selection:text-white">
@@ -162,74 +187,53 @@ const LandingPage: React.FC = () => {
 
       {/* Clients Area - Proyectos Activos */}
       <section id="projects" className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-           <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-8">Proyectos Activos — Área de Clientes</h2>
+        <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-8">Proyectos Activos — Área de Clientes</h2>
 
-           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-              {/* Project Card 1 */}
-              <div className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between h-64 hover:border-blue-300 transition-colors">
-                 <div>
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-xl font-bold text-blue-900">Proyecto 1</h3>
-                        <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">Activo</span>
-                    </div>
-                    <p className="text-slate-500 text-sm">
-                        Proyecto de consultoría SEO en curso. Acceso restringido para el cliente.
-                    </p>
-                 </div>
-                 <button onClick={() => navigate('/clientes')} className="bg-[#FF8A65] hover:bg-[#FF7043] text-white py-2 px-6 rounded-full text-sm font-medium w-max transition-colors shadow-sm">
-                    <span className="mr-1">›</span> Acceder
-                 </button>
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Spinner size={32} className="text-slate-400" />
+          </div>
+        ) : clients.length === 0 ? (
+          <div className="text-center py-20 bg-slate-50 rounded-lg border border-slate-200 border-dashed">
+             <FolderOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+             <p className="text-slate-500 font-medium">No hay proyectos activos visibles.</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {clients.map((client) => (
+              <div
+                key={client.slug}
+                className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between h-64 hover:border-blue-300 transition-colors"
+              >
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-bold text-blue-900 truncate" title={client.name}>
+                      {client.name}
+                    </h3>
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        client.status === 'active'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-slate-100 text-slate-500'
+                      }`}
+                    >
+                      {client.status === 'active' ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </div>
+                  <p className="text-slate-500 text-sm line-clamp-3">
+                    {client.description || 'Proyecto de consultoría SEO.'}
+                  </p>
+                </div>
+                <button
+                  onClick={() => navigate(`/p/${client.slug}`)}
+                  className="bg-[#FF8A65] hover:bg-[#FF7043] text-white py-2 px-6 rounded-full text-sm font-medium w-max transition-colors shadow-sm"
+                >
+                  <span className="mr-1">›</span> Acceder
+                </button>
               </div>
-
-               {/* Project Card 2 */}
-               <div className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between h-64 hover:border-blue-300 transition-colors">
-                 <div>
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-xl font-bold text-blue-900">Proyecto 2</h3>
-                        <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">Activo</span>
-                    </div>
-                    <p className="text-slate-500 text-sm">
-                        Proyecto de consultoría SEO en curso. Acceso restringido para el cliente.
-                    </p>
-                 </div>
-                 <button onClick={() => navigate('/clientes')} className="bg-[#FF8A65] hover:bg-[#FF7043] text-white py-2 px-6 rounded-full text-sm font-medium w-max transition-colors shadow-sm">
-                    <span className="mr-1">›</span> Acceder
-                 </button>
-              </div>
-
-               {/* Project Card 3 */}
-               <div className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between h-64 hover:border-blue-300 transition-colors">
-                 <div>
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-xl font-bold text-blue-900">Proyecto 3</h3>
-                        <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">Activo</span>
-                    </div>
-                    <p className="text-slate-500 text-sm">
-                         Proyecto de consultoría SEO en curso. Acceso restringido para el cliente.
-                    </p>
-                 </div>
-                 <button onClick={() => navigate('/clientes')} className="bg-[#FF8A65] hover:bg-[#FF7043] text-white py-2 px-6 rounded-full text-sm font-medium w-max transition-colors shadow-sm">
-                    <span className="mr-1">›</span> Acceder
-                 </button>
-              </div>
-
-               {/* Project Card 4 */}
-               <div className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between h-64 hover:border-blue-300 transition-colors">
-                 <div>
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-xl font-bold text-blue-900">Proyecto 4</h3>
-                        <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">Activo</span>
-                    </div>
-                    <p className="text-slate-500 text-sm">
-                        Proyecto de consultoría SEO en curso. Acceso restringido para el cliente.
-                    </p>
-                 </div>
-                 <button onClick={() => navigate('/clientes')} className="bg-[#FF8A65] hover:bg-[#FF7043] text-white py-2 px-6 rounded-full text-sm font-medium w-max transition-colors shadow-sm">
-                    <span className="mr-1">›</span> Acceder
-                 </button>
-              </div>
-           </div>
+            ))}
+          </div>
+        )}
       </section>
 
       <div className="w-full h-px bg-slate-200 max-w-7xl mx-auto my-8"></div>

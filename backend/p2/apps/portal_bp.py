@@ -60,6 +60,21 @@ def list_clients():
         })
     return jsonify(safe_clients)
 
+@portal_bp.route('/api/public/clients', methods=['GET'])
+def list_public_clients():
+    clients = get_clients_db()
+    # Filter sensitive data like password hash
+    safe_clients = []
+    for c in clients:
+        # Only show active clients if needed, but requirements just said "as they are created"
+        safe_clients.append({
+            'slug': c.get('slug'),
+            'name': c.get('name'),
+            'status': c.get('status'),
+            'description': c.get('description')
+        })
+    return jsonify(safe_clients)
+
 @portal_bp.route('/api/<slug>/overview', methods=['GET'])
 @require_role(['project', 'clients_area', 'operator'])
 def project_overview(slug):
