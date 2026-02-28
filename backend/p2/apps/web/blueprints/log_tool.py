@@ -26,8 +26,8 @@ def analyze(log_text):
     hits = []
     for line in log_text.split('\n'):
         if 'Googlebot' in line:
-            # Regex simple para URL y Status: busca "METODO URL HTTP..." STATUS
-            m = re.search(r'"(GET|POST) (.*?) HTTP.*?" (\d{3})', line)
+            # Extrae el método HTTP (soporta cualquier método como GET, POST, HEAD, etc.), la URL y el código de estado
+            m = re.search(r'"([A-Z]+)\s+(.*?)\s+HTTP.*?"\s+(\d{3})', line)
             if m: hits.append({'url': m.group(2), 'status': int(m.group(3)), 'bot': 'Googlebot'})
     return hits
 
