@@ -35,12 +35,17 @@ def test_image_audit_scan_invalid_format(client):
     assert response.status_code == 400
     assert 'error' in response.json
 
+
 def test_upload_clusters_invalid_file(client):
+    from unittest.mock import patch
     # Simulate a file upload with invalid extension
     data = {
         'id': 'test-project',
         'file': (io.BytesIO(b"dummy content"), 'test.txt')
     }
-    response = client.post('/projects/upload_clusters', data=data, content_type='multipart/form-data')
-    assert response.status_code == 400
-    assert b"Formato no soportado" in response.data
+
+    # Mock verify_token to bypass authentication for this specific endpoint
+    with patch('apps.web.portal_bp.verify_token', return_value={'role': 'operator', 'sub': 'test'}):
+        response = client.post('/projects/upload_clusters', data=data, content_type='multipart/form-data', headers={'Authorization': 'Bearer test'})
+        assert response.status_code == 400
+        assert b"Formato no soportado" in response.data

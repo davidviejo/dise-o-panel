@@ -95,13 +95,19 @@ def upload_clusters():
             return "El archivo debe tener al menos una columna 'URL'", 400
 
         new_clusters = []
-        for _, row in df.iterrows():
-            url = str(row[col_url]).strip()
-            if pd.isna(url) or url == 'nan' or not url:
+        for row in df.to_dict('records'):
+            raw_url = row.get(col_url)
+            if pd.isna(raw_url):
+                continue
+            url = str(raw_url).strip()
+            if url == 'nan' or not url:
                 continue
 
-            name = str(row[col_name]) if col_name and not pd.isna(row[col_name]) else url
-            kw = str(row[col_kw]) if col_kw and not pd.isna(row[col_kw]) else ""
+            raw_name = row.get(col_name) if col_name else None
+            name = str(raw_name) if not pd.isna(raw_name) else url
+
+            raw_kw = row.get(col_kw) if col_kw else None
+            kw = str(raw_kw) if not pd.isna(raw_kw) else ""
 
             new_clusters.append({
                 "name": name,
