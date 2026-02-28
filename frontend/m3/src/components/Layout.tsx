@@ -331,11 +331,11 @@ const Layout: React.FC<LayoutProps> = ({
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
               M
             </div>
-            <span className="hidden md:block">MediaFlow</span>
+            <span className="hidden lg:block">MediaFlow</span>
           </div>
 
           {/* Tabs */}
-          <nav className="hidden md:flex items-center space-x-1">
+          <nav className="hidden lg:flex items-center space-x-1">
             {(['analitica', 'estrategia', 'acciones', 'backend', 'admin'] as TabType[]).map((tab) => {
               if ((tab === 'admin' || tab === 'backend') && sessionStorage.getItem('portal_role') !== 'operator') return null;
 
@@ -370,13 +370,13 @@ const Layout: React.FC<LayoutProps> = ({
         {/* Mobile Menu Toggle */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="md:hidden text-slate-600 dark:text-slate-300"
+          className="lg:hidden text-slate-600 dark:text-slate-300"
         >
           {isMobileMenuOpen ? <X /> : <Menu />}
         </button>
 
         {/* Right Side Actions */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-3">
           {clients && currentClientId && onSwitchClient && onAddClient && onDeleteClient && (
             <div className="w-64">
                <ClientSwitcher
@@ -410,7 +410,7 @@ const Layout: React.FC<LayoutProps> = ({
         <div className="px-4 pb-4 flex-1 overflow-y-auto custom-scrollbar flex flex-col">
 
           {/* Mobile Client Switcher */}
-          <div className="md:hidden mb-4">
+          <div className="lg:hidden mb-4">
             {clients && currentClientId && onSwitchClient && onAddClient && onDeleteClient && (
                <ClientSwitcher
                 clients={clients}
