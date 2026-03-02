@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { resolveApiUrl } from './apiUrlHelper';
+
+const API_URL = resolveApiUrl();
 
 const getHeaders = () => {
   const headers: Record<string, string> = {

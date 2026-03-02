@@ -1,3 +1,5 @@
+import { resolveApiUrl } from './apiUrlHelper';
+
 interface AuthResponse {
   token: string;
   role: string;
@@ -5,8 +7,8 @@ interface AuthResponse {
   error?: string;
 }
 
-// Configurado para producción y local usando variables de entorno
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Configurado para producción y local usando variables de entorno con fallback inteligente
+const API_URL = resolveApiUrl();
 
 export const api = {
   // Helper to get headers with token

@@ -103,11 +103,7 @@ export const SeoChecklistDetail: React.FC<Props> = ({
       const updates = await runPageAnalysis(page);
       onUpdatePage(page.id, updates);
     } catch (err: any) {
-      if (err.message === 'MOTOR_NOT_CONFIGURED') {
-        setError('Motor no configurado. Configura VITE_PYTHON_ENGINE_URL.');
-      } else {
-        setError(err.message || 'Error durante el análisis.');
-      }
+      setError(err.message || 'Error de conexión con el motor de análisis.');
     } finally {
       setIsAnalyzing(false);
     }
