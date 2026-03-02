@@ -1,6 +1,7 @@
 import { ChecklistKey, AnalysisConfigPayload, Capabilities } from '../types/seoChecklist';
+import { resolveEngineUrl } from './apiUrlHelper';
 
-const ENGINE_URL = import.meta.env.VITE_PYTHON_ENGINE_URL;
+const ENGINE_URL = resolveEngineUrl();
 
 export interface AnalysisPayload {
   url: string;
@@ -70,10 +71,6 @@ export interface BatchJobItem {
 }
 
 export const getCapabilities = async (): Promise<Capabilities | null> => {
-  if (!ENGINE_URL) {
-    return null;
-  }
-
   try {
     const response = await fetch(`${ENGINE_URL}/api/capabilities`);
     if (!response.ok) {
@@ -88,10 +85,6 @@ export const getCapabilities = async (): Promise<Capabilities | null> => {
 };
 
 export const analyzeUrl = async (payload: AnalysisPayload): Promise<AnalysisResponse> => {
-  if (!ENGINE_URL) {
-    throw new Error('MOTOR_NOT_CONFIGURED');
-  }
-
   try {
     const response = await fetch(`${ENGINE_URL}/api/analyze`, {
       method: 'POST',
@@ -108,9 +101,6 @@ export const analyzeUrl = async (payload: AnalysisPayload): Promise<AnalysisResp
     const data = await response.json();
     return data as AnalysisResponse;
   } catch (error: any) {
-    if (error.message === 'MOTOR_NOT_CONFIGURED') {
-      throw error;
-    }
     console.error('Python Engine Error:', error);
     throw new Error(error.message || 'Error connecting to Python Engine');
   }
@@ -119,10 +109,6 @@ export const analyzeUrl = async (payload: AnalysisPayload): Promise<AnalysisResp
 // Batch API Methods
 
 export const createBatchJob = async (payload: BatchJobPayload): Promise<BatchJobResponse> => {
-  if (!ENGINE_URL) {
-    throw new Error('MOTOR_NOT_CONFIGURED');
-  }
-
   const response = await fetch(`${ENGINE_URL}/api/jobs`, {
     method: 'POST',
     headers: {
@@ -143,10 +129,6 @@ export const createBatchJob = async (payload: BatchJobPayload): Promise<BatchJob
 };
 
 export const getBatchJob = async (jobId: string): Promise<BatchJobStatus> => {
-  if (!ENGINE_URL) {
-    throw new Error('MOTOR_NOT_CONFIGURED');
-  }
-
   const response = await fetch(`${ENGINE_URL}/api/jobs/${jobId}`);
   if (!response.ok) {
     throw new Error(`Failed to get job status: ${response.statusText}`);
@@ -158,10 +140,6 @@ export const updateBatchJob = async (
   jobId: string,
   action: 'pause' | 'resume' | 'cancel',
 ): Promise<void> => {
-  if (!ENGINE_URL) {
-    throw new Error('MOTOR_NOT_CONFIGURED');
-  }
-
   const response = await fetch(`${ENGINE_URL}/api/jobs/${jobId}`, {
     method: 'PATCH', // Assuming PATCH for updates, or POST to /actions
     headers: {
@@ -181,10 +159,6 @@ export const getBatchJobItems = async (
   page: number = 1,
   limit: number = 50,
 ): Promise<{ items: BatchJobItem[]; total: number }> => {
-  if (!ENGINE_URL) {
-    throw new Error('MOTOR_NOT_CONFIGURED');
-  }
-
   const params = new URLSearchParams({
     page: page.toString(),
     limit: limit.toString(),
@@ -204,10 +178,6 @@ export const getBatchJobItemResult = async (
   jobId: string,
   itemId: string,
 ): Promise<AnalysisResponse> => {
-  if (!ENGINE_URL) {
-    throw new Error('MOTOR_NOT_CONFIGURED');
-  }
-
   const response = await fetch(`${ENGINE_URL}/api/jobs/${jobId}/items/${itemId}/result`);
   if (!response.ok) {
     throw new Error(`Failed to get item result: ${response.statusText}`);
