@@ -31,8 +31,8 @@ class Config:
     DATAFORSEO_PASSWORD = os.environ.get('DATAFORSEO_PASSWORD')
 
     # Portal Auth
-    CLIENTS_AREA_PASSWORD = os.environ.get('CLIENTS_AREA_PASSWORD')
-    OPERATOR_PASSWORD = os.environ.get('OPERATOR_PASSWORD')
+    CLIENTS_AREA_PASSWORD = os.environ.get('CLIENTS_AREA_PASSWORD', '123456')
+    OPERATOR_PASSWORD = os.environ.get('OPERATOR_PASSWORD', '123456')
 
     JWT_SECRET = os.environ.get('JWT_SECRET', secrets.token_hex(32))
 

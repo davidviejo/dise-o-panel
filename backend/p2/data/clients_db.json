@@ -4,13 +4,13 @@
     "name": "Diego Casas",
     "status": "active",
     "description": "Cliente de ejemplo Diego Casas.",
-    "project_password_hash": "$2b$12$QG2Nmk8m3ncKvxJskZkU6uCJ1yYMNzg9DhqwFccRBQKV5X.z5mjsy"
+    "project_password_hash": "$2b$12$ZJyhtsDZULSIcsi5z8sarOlM2nsj/ewNJg0E4.wpfE.8f.7ySdWLi"
   },
   {
     "slug": "demo-project",
     "name": "Demo Project",
     "status": "active",
     "description": "A demo project.",
-    "project_password_hash": "$2b$12$"
+    "project_password_hash": "$2b$12$6wseTwxisB2XcDtI3uWNVOr9EwoIpnjBA2NoQzmcZPwV99F46ytXW"
   }
 ]

@@ -350,12 +350,6 @@ const Layout: React.FC<LayoutProps> = ({
           <nav className="hidden lg:flex items-center space-x-1">
             {(['analitica', 'estrategia', 'acciones', 'backend', 'admin'] as TabType[]).map(
               (tab) => {
-                if (
-                  (tab === 'admin' || tab === 'backend') &&
-                  sessionStorage.getItem('portal_role') !== 'operator'
-                )
-                  return null;
-
                 let toPath = '/app/';
                 if (tab === 'estrategia') toPath = '/app/client-roadmap';
                 if (tab === 'acciones') toPath = '/app/kanban';
@@ -442,12 +436,6 @@ const Layout: React.FC<LayoutProps> = ({
             <div className="grid grid-cols-2 gap-2 mb-4">
               {(['analitica', 'estrategia', 'acciones', 'backend', 'admin'] as TabType[]).map(
                 (tab) => {
-                  if (
-                    (tab === 'admin' || tab === 'backend') &&
-                    sessionStorage.getItem('portal_role') !== 'operator'
-                  )
-                    return null;
-
                   let toPath = '/app/';
                   if (tab === 'estrategia') toPath = '/app/client-roadmap';
                   if (tab === 'acciones') toPath = '/app/kanban';
