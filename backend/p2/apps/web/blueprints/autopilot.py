@@ -299,7 +299,9 @@ def start():
         'mode': data.get('mode', 'ddg'),
         'cookie': data.get('cookie'),
         'cse_key': data.get('cse_key'),
-        'cse_cx': data.get('cse_cx')
+        'cse_cx': data.get('cse_cx'),
+        'dfs_login': data.get('dfs_login'),
+        'dfs_pass': data.get('dfs_pass')
     }
 
     threading.Thread(target=worker_elite_process, args=(project, config)).start()
