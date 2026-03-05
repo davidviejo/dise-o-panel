@@ -350,6 +350,16 @@ def smart_serp_search(keyword: str, config: Optional[Dict] = None, num_results: 
         if not cfg.get('serpapi_key'): cfg['serpapi_key'] = session.get('serpapi_key')
         if not cfg.get('serp_provider'): cfg['serp_provider'] = session.get('serp_provider')
 
+    # Inject settings from db if missing
+    try:
+        from apps.core.database import get_user_settings
+        settings = get_user_settings('default') or {}
+        if not cfg.get('dfs_login'): cfg['dfs_login'] = settings.get('dataforseo_login')
+        if not cfg.get('dfs_pass'): cfg['dfs_pass'] = settings.get('dataforseo_password')
+        if not cfg.get('serpapi_key'): cfg['serpapi_key'] = settings.get('serpapi_key')
+    except Exception as e:
+        logging.error(f"Error loading settings for smart_serp_search: {e}")
+
     mode = cfg.get('mode')
     provider = cfg.get('serp_provider')
 
@@ -420,7 +430,7 @@ def smart_serp_search(keyword: str, config: Optional[Dict] = None, num_results: 
 
     # 3.3 DuckDuckGo (Fallback final)
     try:
-        from duckduckgo_search import DDGS
+        from ddgs import DDGS
         with DDGS() as ddgs:
             region = "es-es" if "es" in lang.lower() else "us-en"
             ddg_results = []

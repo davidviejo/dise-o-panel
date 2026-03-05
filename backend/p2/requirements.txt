@@ -62,7 +62,7 @@ distro==1.9.0
     #   openai
 docstring-parser==0.17.0
     # via anthropic
-duckduckgo-search==8.1.1
+ddgs==9.11.2
     # via -r backend/p2/requirements.in
 et-xmlfile==2.0.0
     # via openpyxl
