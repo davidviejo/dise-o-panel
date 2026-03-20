@@ -22,6 +22,7 @@ import {
   Layers,
   ExternalLink,
   Edit2,
+  Calendar,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DEFAULT_KANBAN_COLUMNS } from '../config/kanban';
@@ -341,6 +342,23 @@ const KanbanBoard: React.FC = () => {
                                     onBlur={(e) =>
                                       updateTaskDetails(item.moduleId, item.task.id, {
                                         assignee: e.target.value,
+                                      })
+                                    }
+                                  />
+                                </div>
+                                <div
+                                  className="flex items-center gap-2"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <Calendar size={14} className="text-slate-400" />
+                                  <input
+                                    type="date"
+                                    title="Fecha estimada"
+                                    className="flex-1 bg-transparent text-xs text-slate-600 dark:text-slate-300 focus:outline-none border-b border-transparent focus:border-blue-300 transition-colors py-0.5 cursor-pointer"
+                                    value={item.task.dueDate || ''}
+                                    onChange={(e) =>
+                                      updateTaskDetails(item.moduleId, item.task.id, {
+                                        dueDate: e.target.value,
                                       })
                                     }
                                   />

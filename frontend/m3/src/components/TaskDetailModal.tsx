@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Task } from '../types';
-import { X, Save, FileText, CheckCircle2, Circle } from 'lucide-react';
+import { X, Save, FileText, CheckCircle2, Circle, Calendar } from 'lucide-react';
 
 interface TaskDetailModalProps {
   isOpen: boolean;
@@ -23,6 +23,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   const [impact, setImpact] = useState<'High' | 'Medium' | 'Low'>('Medium');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState('');
 
   // Keep local state in sync if task props change while modal is open
   useEffect(() => {
@@ -31,6 +32,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
       setImpact(task.impact || 'Medium');
       setTitle(task.title || '');
       setDescription(task.description || '');
+      setDueDate(task.dueDate || '');
     }
   }, [task]);
 
@@ -42,6 +44,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
       impact: impact,
       title: title,
       description: description,
+      dueDate: dueDate,
     });
     onClose();
   };
@@ -88,7 +91,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
                 Impacto
@@ -102,6 +105,19 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 <option value="Medium">⚡ Impacto Medio</option>
                 <option value="Low">☕ Bajo Impacto</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-1">
+                <Calendar size={16} />
+                Fecha o Mes
+              </label>
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+              />
             </div>
 
             <div>
