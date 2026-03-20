@@ -19,6 +19,7 @@ export interface Task {
   communicated?: boolean;
   externalLink?: string;
   assignee?: string;
+  dueDate?: string;
 }
 
 export interface CompletedTask {
