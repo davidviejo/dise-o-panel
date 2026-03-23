@@ -101,8 +101,8 @@
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Proveedor SERP Global</label>
                         <select id="input_serp_provider" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 transition-colors">
-                            <option value="auto" {% if config.serp_provider == 'auto' or not config.serp_provider %}selected{% endif %}>Automático (Recomendado)</option>
-                            <option value="dataforseo" {% if config.serp_provider == 'dataforseo' %}selected{% endif %}>DataForSEO (Oficial)</option>
+                            <option value="dataforseo" {% if config.serp_provider == 'dataforseo' or not config.serp_provider %}selected{% endif %}>DataForSEO (Predeterminado)</option>
+                            <option value="auto" {% if config.serp_provider == 'auto' %}selected{% endif %}>Automático</option>
                             <option value="serpapi" {% if config.serp_provider == 'serpapi' %}selected{% endif %}>SerpApi (Google)</option>
                             <option value="google_official" {% if config.serp_provider == 'google_official' %}selected{% endif %}>Google API (Custom Search)</option>
                             <option value="google_scraping" {% if config.serp_provider == 'google_scraping' %}selected{% endif %}>Google Scraping (Directo)</option>

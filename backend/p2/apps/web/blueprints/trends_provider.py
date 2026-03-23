@@ -216,7 +216,7 @@ class DataForSEOProvider(TrendsProvider):
             logging.error(f"DataForSEOProvider Error: {e}")
             raise e
 
-def fetch_trends_strategy(geo: str, category: str, provider_name: str = 'auto', **kwargs) -> List[Dict[str, Any]]:
+def fetch_trends_strategy(geo: str, category: str, provider_name: str = 'dataforseo', **kwargs) -> List[Dict[str, Any]]:
     """
     Función helper para invocar la estrategia adecuada.
     """
@@ -225,8 +225,11 @@ def fetch_trends_strategy(geo: str, category: str, provider_name: str = 'auto', 
             return SerpApiProvider().fetch_trends(geo, category, **kwargs)
         elif provider_name == 'dataforseo':
             return DataForSEOProvider().fetch_trends(geo, category, **kwargs)
+        elif provider_name == 'auto':
+            if kwargs.get('login') and kwargs.get('password'):
+                return DataForSEOProvider().fetch_trends(geo, category, **kwargs)
+            return GoogleInternalProvider().fetch_trends(geo, category, **kwargs)
         else:
-            # Fallback o 'auto' que por defecto es Google Internal
             return GoogleInternalProvider().fetch_trends(geo, category, **kwargs)
     except Exception as e:
         # Si falla el provider específico y era 'auto', podríamos intentar fallback?

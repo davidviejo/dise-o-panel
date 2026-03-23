@@ -103,8 +103,8 @@ class TestTrendsIntegration(unittest.TestCase):
 
         worker_realtime_trends("job3", "MX", "t")
 
-        # Fallback to auto
-        mock_fetch.assert_called_with("MX", "t", provider_name="auto")
+        # Fallback directo al proveedor interno si DataForSEO no está disponible
+        mock_fetch.assert_called_with("MX", "t", provider_name="internal")
 
 if __name__ == '__main__':
     unittest.main()

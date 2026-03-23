@@ -134,7 +134,7 @@ def run_orchestrated_checklist(
             max_comp_env = current_app.config.get('ENGINE_MAX_COMPETITORS_PER_KEYWORD', 5)
 
             serp_cfg = {
-                'provider': serp_provider or 'auto',
+                'provider': serp_provider or 'dataforseo',
                 'maxKeywordsPerUrl': min(10, max_kw_env),
                 'maxCompetitorsPerKeyword': min(3, max_comp_env)
             }
@@ -227,8 +227,8 @@ def run_orchestrated_checklist(
             if not target_urls and kwPrincipal:
                 try:
                     cfg = {
-                        'mode': serp_cfg.get('provider', 'auto'),
-                        'serp_provider': serp_cfg.get('provider', 'auto'),
+                        'mode': serp_cfg.get('provider', 'dataforseo'),
+                        'serp_provider': serp_cfg.get('provider', 'dataforseo'),
                         'gl': geoTarget or 'es',
                         'hl': 'es',
                         'cse_key': resolved_serpapi_key,
@@ -566,8 +566,8 @@ def run_orchestrated_checklist(
                 limit_kw = int(serp_cfg.get('maxKeywordsPerUrl', 20))
 
                 cfg = {
-                    'mode': serp_cfg.get('provider', 'auto'),
-                    'serp_provider': serp_cfg.get('provider', 'auto'),
+                    'mode': serp_cfg.get('provider', 'dataforseo'),
+                    'serp_provider': serp_cfg.get('provider', 'dataforseo'),
                     'gl': geoTarget or 'es',
                     'hl': 'es',
                     'serpapi_key': resolved_serpapi_key,
@@ -754,7 +754,7 @@ def run_orchestrated_checklist(
 
     # ENGINE META (PUNTO 1 & 6)
     engine_meta = {
-        "requestedProvider": serp_cfg.get('provider', 'auto'),
+        "requestedProvider": serp_cfg.get('provider', 'dataforseo'),
         "usedProvider": provider_used or 'none',
         "fallbackChain": [provider_used] if provider_used else [],
         "providerFailureReasons": {},

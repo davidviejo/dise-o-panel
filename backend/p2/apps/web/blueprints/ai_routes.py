@@ -144,7 +144,7 @@ def dashboard():
         'google_cse_cx': session.get('google_cse_cx', ''),
         'scraping_cookie': session.get('scraping_cookie', ''),
         'memory_context_window': session.get('memory_context_window', 'standard'),
-        'serp_provider': session.get('serp_provider', 'auto'),
+        'serp_provider': session.get('serp_provider', 'dataforseo'),
         'serpapi_key': session.get('serpapi_key', '')
     }
 

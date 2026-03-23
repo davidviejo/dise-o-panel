@@ -110,15 +110,6 @@ export const SeoChecklistSettingsModal: React.FC<Props> = ({
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                   >
                     <option
-                      value="serpapi"
-                      disabled={capabilities && !capabilities.serpProviders['serpapi']}
-                    >
-                      SerpApi{' '}
-                      {capabilities && !capabilities.serpProviders['serpapi']
-                        ? '(No disponible)'
-                        : ''}
-                    </option>
-                    <option
                       value="dataforseo"
                       disabled={
                         !!(
@@ -130,14 +121,23 @@ export const SeoChecklistSettingsModal: React.FC<Props> = ({
                           )
                         )
                       }
-                    >
-                      DataForSEO{' '}
+>
+                      DataForSEO (Predeterminado){' '}
                       {capabilities &&
                       !capabilities.serpProviders['dataforseo'] &&
                       !(
                         formData.serp.dataforseoLogin?.trim() &&
                         formData.serp.dataforseoPassword?.trim()
                       )
+                        ? '(No disponible)'
+                        : ''}
+                    </option>
+                    <option
+                      value="serpapi"
+                      disabled={capabilities && !capabilities.serpProviders['serpapi']}
+                    >
+                      SerpApi{' '}
+                      {capabilities && !capabilities.serpProviders['serpapi']
                         ? '(No disponible)'
                         : ''}
                     </option>
