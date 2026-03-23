@@ -3,124 +3,503 @@
 {% block title %}SEO Frameworks{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <h2 class="mb-4">📚 SEO Frameworks <span class="badge bg-info text-dark fs-6">Protocolos</span></h2>
-    <p class="text-muted mb-4">Guías paso a paso para utilizar esta suite en situaciones reales de consultoría.</p>
-
-    <div class="row g-4">
-        
-        <!-- 1. AUDITORÍA -->
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100 border-0 border-top border-4 border-primary">
-                <div class="card-body">
-                    <h4 class="fw-bold text-primary mb-3"><i class="bi bi-speedometer2"></i> Auditoría Express</h4>
-                    <p class="small text-muted">Para detectar errores técnicos graves en los primeros 10 minutos.</p>
-                    <ul class="list-group list-group-flush small">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>1. Busca fugas de indexación y hackeos</span>
-                            <a href="/dorks" class="btn btn-sm btn-outline-primary py-0">Google Dorks</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>2. Comprueba si Googlebot puede entrar</span>
-                            <a href="/robots" class="btn btn-sm btn-outline-primary py-0">Robots.txt</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>3. Verifica códigos de estado (404/500)</span>
-                            <a href="/fast" class="btn btn-sm btn-outline-primary py-0">Fast Status</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>4. Revisa SSL y Caché</span>
-                            <a href="/headers" class="btn btn-sm btn-outline-primary py-0">Headers</a>
-                        </li>
-                    </ul>
+<div class="container-fluid frameworks-page">
+    <section class="frameworks-hero rounded-4 p-4 p-lg-5 mb-4 overflow-hidden position-relative">
+        <div class="row align-items-center g-4 position-relative">
+            <div class="col-xl-8">
+                <span class="frameworks-kicker badge rounded-pill text-bg-light text-primary px-3 py-2 mb-3">
+                    📚 Protocolos operativos
+                </span>
+                <h1 class="display-6 fw-bold text-white mb-3">Frameworks SEO listos para ejecutar en consultoría real</h1>
+                <p class="lead text-white-50 mb-4 pe-xl-5">
+                    Convierte decenas de herramientas sueltas en flujos accionables. Elige un framework, sigue los pasos y salta a cada utilidad en el orden recomendado.
+                </p>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="frameworks-chip"><strong>4</strong> recorridos guiados</span>
+                    <span class="frameworks-chip"><strong>16</strong> pasos enlazados</span>
+                    <span class="frameworks-chip">Pensado para auditoría, contenido, migraciones y pruning</span>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="frameworks-panel rounded-4 p-4 h-100">
+                    <p class="text-uppercase small fw-bold text-primary-emphasis mb-2">Cómo usar esta pantalla</p>
+                    <ol class="small text-secondary mb-0 ps-3 d-grid gap-2">
+                        <li>Selecciona el escenario operativo.</li>
+                        <li>Filtra por tipo de trabajo si quieres acotar opciones.</li>
+                        <li>Abre cada herramienta en una nueva pestaña y ejecuta la secuencia.</li>
+                    </ol>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- 2. CONTENIDOS -->
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100 border-0 border-top border-4 border-success">
-                <div class="card-body">
-                    <h4 class="fw-bold text-success mb-3"><i class="bi bi-pen"></i> Estrategia Editorial</h4>
-                    <p class="small text-muted">Flujo para crear calendarios de contenido que posicionan.</p>
-                    <ul class="list-group list-group-flush small">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>1. Encuentra ideas long-tail</span>
-                            <a href="/suggest" class="btn btn-sm btn-outline-success py-0">Discovery</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>2. Agrupa por intención (Cluster)</span>
-                            <a href="/seo" class="btn btn-sm btn-outline-success py-0">SEO Suite</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>3. ¿Canibalización? (Mismo resultado SERP)</span>
-                            <a href="/overlap" class="btn btn-sm btn-outline-success py-0">Overlap</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>4. Roba los encabezados del líder</span>
-                            <a href="/structure" class="btn btn-sm btn-outline-success py-0">Header Map</a>
-                        </li>
-                    </ul>
+    <section class="frameworks-toolbar card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-3 p-lg-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-lg-6">
+                    <label for="frameworkSearch" class="form-label small text-uppercase fw-bold text-muted mb-2">Buscar framework</label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-white border-end-0">🔎</span>
+                        <input id="frameworkSearch" type="search" class="form-control border-start-0" placeholder="Ej: migración, canibalización, auditoría...">
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <label class="form-label small text-uppercase fw-bold text-muted mb-2">Filtrar por objetivo</label>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-filter active" type="button" data-filter="all">Todos</button>
+                        <button class="btn btn-filter" type="button" data-filter="audit">Auditoría</button>
+                        <button class="btn btn-filter" type="button" data-filter="content">Contenido</button>
+                        <button class="btn btn-filter" type="button" data-filter="migration">Migración</button>
+                        <button class="btn btn-filter" type="button" data-filter="cleanup">Pruning</button>
+                    </div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- 3. MIGRACIÓN -->
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100 border-0 border-top border-4 border-warning">
-                <div class="card-body">
-                    <h4 class="fw-bold text-warning text-dark mb-3"><i class="bi bi-arrow-left-right"></i> Migración Web</h4>
-                    <p class="small text-muted">Protocolo de seguridad al cambiar de dominio o diseño.</p>
-                    <ul class="list-group list-group-flush small">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>1. Compara HTML Staging vs Live</span>
-                            <a href="/diff" class="btn btn-sm btn-outline-warning text-dark py-0">Diff Checker</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>2. Genera reglas .htaccess 301</span>
-                            <a href="/migration" class="btn btn-sm btn-outline-warning text-dark py-0">Migration</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>3. Evita cadenas de redirección</span>
-                            <a href="/redirect" class="btn btn-sm btn-outline-warning text-dark py-0">Redirect Tracer</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>4. Verifica que se indexan</span>
-                            <a href="/indexer" class="btn btn-sm btn-outline-warning text-dark py-0">Index Check</a>
-                        </li>
-                    </ul>
+    <section class="row g-4" id="frameworkGrid">
+        <div class="col-12 col-xl-6 framework-card" data-category="audit" data-search="auditoría express errores técnicos indexación hackeos robots fast status headers ssl cache">
+            <article class="card framework-shell h-100 border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="d-flex flex-wrap justify-content-between gap-3 mb-4">
+                        <div>
+                            <div class="framework-icon bg-primary-subtle text-primary">⚡</div>
+                            <h2 class="h3 fw-bold text-primary mt-3 mb-2">Auditoría Express</h2>
+                            <p class="text-muted mb-0">Para detectar errores técnicos graves en los primeros 10 minutos y priorizar un diagnóstico inicial.</p>
+                        </div>
+                        <div class="framework-meta text-end">
+                            <span class="badge rounded-pill text-bg-primary-subtle text-primary-emphasis mb-2">Auditoría</span>
+                            <p class="small text-muted mb-0">Ideal para onboarding, incidencias o revisión rápida.</p>
+                        </div>
+                    </div>
+
+                    <div class="framework-outcome rounded-4 p-3 mb-4">
+                        <strong class="d-block mb-1">Resultado esperado</strong>
+                        <span class="text-muted small">Identificar bloqueos de indexación, errores de acceso y señales de infraestructura comprometida.</span>
+                    </div>
+
+                    <div class="framework-steps d-grid gap-3">
+                        <div class="framework-step">
+                            <span class="step-number">1</span>
+                            <div>
+                                <h3>Busca fugas de indexación y hackeos</h3>
+                                <p>Haz una comprobación inicial de footprint en Google y detecta páginas sospechosas o expuestas.</p>
+                            </div>
+                            <a href="/dorks" class="btn btn-outline-primary">Google Dorks</a>
+                        </div>
+                        <div class="framework-step">
+                            <span class="step-number">2</span>
+                            <div>
+                                <h3>Comprueba si Googlebot puede entrar</h3>
+                                <p>Valida reglas críticas en robots.txt y bloqueos accidentales del rastreo.</p>
+                            </div>
+                            <a href="/robots" class="btn btn-outline-primary">Robots.txt</a>
+                        </div>
+                        <div class="framework-step">
+                            <span class="step-number">3</span>
+                            <div>
+                                <h3>Verifica códigos de estado</h3>
+                                <p>Detecta 404, 500 o respuestas inestables que rompan la experiencia y el rastreo.</p>
+                            </div>
+                            <a href="/fast" class="btn btn-outline-primary">Fast Status</a>
+                        </div>
+                        <div class="framework-step">
+                            <span class="step-number">4</span>
+                            <div>
+                                <h3>Revisa SSL y caché</h3>
+                                <p>Comprueba headers, políticas de cacheo y consistencia del entorno de entrega.</p>
+                            </div>
+                            <a href="/headers" class="btn btn-outline-primary">Headers</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </article>
         </div>
 
-        <!-- 4. LIMPIEZA (PRUNING) -->
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100 border-0 border-top border-4 border-danger">
-                <div class="card-body">
-                    <h4 class="fw-bold text-danger mb-3"><i class="bi bi-trash"></i> Content Pruning</h4>
-                    <p class="small text-muted">Limpieza de contenido tóxico o antiguo.</p>
-                    <ul class="list-group list-group-flush small">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>1. Detectar posts caducados</span>
-                            <a href="/decay" class="btn btn-sm btn-outline-danger py-0">Decay</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>2. Detectar canibalización de títulos</span>
-                            <a href="/cannibal" class="btn btn-sm btn-outline-danger py-0">Cannibal</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>3. Detectar páginas huérfanas</span>
-                            <a href="/orphan" class="btn btn-sm btn-outline-danger py-0">Orphan</a>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>4. Detectar Thin Content / Code Bloat</span>
-                            <a href="/ratio" class="btn btn-sm btn-outline-danger py-0">Code Ratio</a>
-                        </li>
-                    </ul>
+        <div class="col-12 col-xl-6 framework-card" data-category="content" data-search="estrategia editorial contenido calendario long tail cluster intención canibalización serp headers">
+            <article class="card framework-shell h-100 border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="d-flex flex-wrap justify-content-between gap-3 mb-4">
+                        <div>
+                            <div class="framework-icon bg-success-subtle text-success">✍️</div>
+                            <h2 class="h3 fw-bold text-success mt-3 mb-2">Estrategia Editorial</h2>
+                            <p class="text-muted mb-0">Flujo para construir calendarios de contenido con intención clara y menor riesgo de canibalización.</p>
+                        </div>
+                        <div class="framework-meta text-end">
+                            <span class="badge rounded-pill text-bg-success-subtle text-success-emphasis mb-2">Contenido</span>
+                            <p class="small text-muted mb-0">Útil para planning mensual y arquitectura de topics.</p>
+                        </div>
+                    </div>
+
+                    <div class="framework-outcome rounded-4 p-3 mb-4">
+                        <strong class="d-block mb-1">Resultado esperado</strong>
+                        <span class="text-muted small">Salir con ideas, agrupaciones por intención y referencias estructurales para redactar con foco SEO.</span>
+                    </div>
+
+                    <div class="framework-steps d-grid gap-3">
+                        <div class="framework-step">
+                            <span class="step-number">1</span>
+                            <div>
+                                <h3>Encuentra ideas long-tail</h3>
+                                <p>Descubre oportunidades de demanda y preguntas específicas para abrir nuevas piezas.</p>
+                            </div>
+                            <a href="/suggest" class="btn btn-outline-success">Discovery</a>
+                        </div>
+                        <div class="framework-step">
+                            <span class="step-number">2</span>
+                            <div>
+                                <h3>Agrupa por intención</h3>
+                                <p>Clusteriza keywords y separa correctamente informacional, comercial y transaccional.</p>
+                            </div>
+                            <a href="/seo" class="btn btn-outline-success">SEO Suite</a>
+                        </div>
+                        <div class="framework-step">
+                            <span class="step-number">3</span>
+                            <div>
+                                <h3>Detecta canibalización SERP</h3>
+                                <p>Verifica si varias keywords activan el mismo resultado y evita duplicar esfuerzos.</p>
+                            </div>
+                            <a href="/overlap" class="btn btn-outline-success">Overlap</a>
+                        </div>
+                        <div class="framework-step">
+                            <span class="step-number">4</span>
+                            <div>
+                                <h3>Modela los encabezados del líder</h3>
+                                <p>Extrae estructura de H1-H6 para acelerar briefs y outlines competitivos.</p>
+                            </div>
+                            <a href="/structure" class="btn btn-outline-success">Header Map</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </article>
         </div>
 
+        <div class="col-12 col-xl-6 framework-card" data-category="migration" data-search="migración staging live htaccess redirect indexación dominio rediseño diff checker">
+            <article class="card framework-shell h-100 border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="d-flex flex-wrap justify-content-between gap-3 mb-4">
+                        <div>
+                            <div class="framework-icon bg-warning-subtle text-warning-emphasis">🔁</div>
+                            <h2 class="h3 fw-bold text-warning-emphasis mt-3 mb-2">Migración Web</h2>
+                            <p class="text-muted mb-0">Protocolo de seguridad para cambios de dominio, rediseños, replatformings o salidas a producción.</p>
+                        </div>
+                        <div class="framework-meta text-end">
+                            <span class="badge rounded-pill text-bg-warning-subtle text-warning-emphasis mb-2">Migración</span>
+                            <p class="small text-muted mb-0">Ideal para pre-launch, launch day y post-migración.</p>
+                        </div>
+                    </div>
+
+                    <div class="framework-outcome rounded-4 p-3 mb-4">
+                        <strong class="d-block mb-1">Resultado esperado</strong>
+                        <span class="text-muted small">Reducir pérdidas de tráfico y cobertura detectando diferencias HTML, redirects defectuosos y problemas de indexación.</span>
+                    </div>
+
+                    <div class="framework-steps d-grid gap-3">
+                        <div class="framework-step">
+                            <span class="step-number">1</span>
+                            <div>
+                                <h3>Compara staging vs live</h3>
+                                <p>Encuentra cambios estructurales o bloques inesperados antes del despliegue.</p>
+                            </div>
+                            <a href="/diff" class="btn btn-outline-warning">Diff Checker</a>
+                        </div>
+                        <div class="framework-step">
+                            <span class="step-number">2</span>
+                            <div>
+                                <h3>Genera reglas 301</h3>
+                                <p>Construye redirecciones consistentes para conservar equity y rutas históricas.</p>
+                            </div>
+                            <a href="/migration" class="btn btn-outline-warning">Migration</a>
+                        </div>
+                        <div class="framework-step">
+                            <span class="step-number">3</span>
+                            <div>
+                                <h3>Evita cadenas de redirección</h3>
+                                <p>Depura loops y hops innecesarios que erosionan rastreo y rendimiento.</p>
+                            </div>
+                            <a href="/redirect" class="btn btn-outline-warning">Redirect Tracer</a>
+                        </div>
+                        <div class="framework-step">
+                            <span class="step-number">4</span>
+                            <div>
+                                <h3>Verifica indexación final</h3>
+                                <p>Comprueba que las nuevas URLs ya pueden entrar en cobertura correctamente.</p>
+                            </div>
+                            <a href="/indexer" class="btn btn-outline-warning">Index Check</a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <div class="col-12 col-xl-6 framework-card" data-category="cleanup" data-search="content pruning limpieza contenido tóxico antiguo decay canibalización orphan thin content code bloat">
+            <article class="card framework-shell h-100 border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="d-flex flex-wrap justify-content-between gap-3 mb-4">
+                        <div>
+                            <div class="framework-icon bg-danger-subtle text-danger">🧹</div>
+                            <h2 class="h3 fw-bold text-danger mt-3 mb-2">Content Pruning</h2>
+                            <p class="text-muted mb-0">Limpieza de contenido caducado, duplicado o débil para recuperar foco editorial y calidad del sitio.</p>
+                        </div>
+                        <div class="framework-meta text-end">
+                            <span class="badge rounded-pill text-bg-danger-subtle text-danger-emphasis mb-2">Pruning</span>
+                            <p class="small text-muted mb-0">Útil para sites con histórico amplio o señales de fatiga SEO.</p>
+                        </div>
+                    </div>
+
+                    <div class="framework-outcome rounded-4 p-3 mb-4">
+                        <strong class="d-block mb-1">Resultado esperado</strong>
+                        <span class="text-muted small">Detectar piezas a consolidar, actualizar o retirar para reforzar la autoridad temática y simplificar la arquitectura.</span>
+                    </div>
+
+                    <div class="framework-steps d-grid gap-3">
+                        <div class="framework-step">
+                            <span class="step-number">1</span>
+                            <div>
+                                <h3>Detecta posts caducados</h3>
+                                <p>Localiza URLs con pérdida de tracción o señales de obsolescencia sostenida.</p>
+                            </div>
+                            <a href="/decay" class="btn btn-outline-danger">Decay</a>
+                        </div>
+                        <div class="framework-step">
+                            <span class="step-number">2</span>
+                            <div>
+                                <h3>Revisa canibalización de títulos</h3>
+                                <p>Encuentra páginas que compiten entre sí y requieren consolidación editorial.</p>
+                            </div>
+                            <a href="/cannibal" class="btn btn-outline-danger">Cannibal</a>
+                        </div>
+                        <div class="framework-step">
+                            <span class="step-number">3</span>
+                            <div>
+                                <h3>Encuentra páginas huérfanas</h3>
+                                <p>Identifica URLs sin soporte interno que consumen presupuesto de rastreo.</p>
+                            </div>
+                            <a href="/orphan" class="btn btn-outline-danger">Orphan</a>
+                        </div>
+                        <div class="framework-step">
+                            <span class="step-number">4</span>
+                            <div>
+                                <h3>Prioriza thin content o code bloat</h3>
+                                <p>Analiza páginas con poco valor útil frente al peso de código y markup.</p>
+                            </div>
+                            <a href="/ratio" class="btn btn-outline-danger">Code Ratio</a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <div id="frameworkEmptyState" class="card border-0 shadow-sm rounded-4 mt-4 d-none">
+        <div class="card-body p-5 text-center">
+            <div class="display-6 mb-3">🧭</div>
+            <h3 class="h4 fw-bold mb-2">No hay frameworks que coincidan</h3>
+            <p class="text-muted mb-0">Prueba otro término de búsqueda o limpia los filtros para volver a ver todos los recorridos.</p>
+        </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<style>
+    .frameworks-page {
+        max-width: 1440px;
+        margin: 0 auto;
+    }
+
+    .frameworks-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 55%, #38bdf8 100%);
+        box-shadow: 0 28px 80px rgba(37, 99, 235, 0.18);
+    }
+
+    .frameworks-hero::before,
+    .frameworks-hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(10px);
+        opacity: 0.35;
+    }
+
+    .frameworks-hero::before {
+        width: 220px;
+        height: 220px;
+        background: rgba(255,255,255,0.18);
+        top: -70px;
+        right: 8%;
+    }
+
+    .frameworks-hero::after {
+        width: 160px;
+        height: 160px;
+        background: rgba(191,219,254,0.28);
+        bottom: -60px;
+        right: 28%;
+    }
+
+    .frameworks-kicker {
+        font-size: 0.82rem;
+        letter-spacing: 0.02em;
+    }
+
+    .frameworks-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        padding: 0.65rem 0.95rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.16);
+        backdrop-filter: blur(8px);
+        font-size: 0.92rem;
+    }
+
+    .frameworks-panel {
+        background: rgba(255,255,255,0.94);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+    }
+
+    .frameworks-toolbar .form-control,
+    .frameworks-toolbar .input-group-text {
+        border-color: #dbe4f0;
+    }
+
+    .btn-filter {
+        border-radius: 999px;
+        padding: 0.6rem 1rem;
+        border: 1px solid #dbe4f0;
+        background: #fff;
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .btn-filter:hover,
+    .btn-filter.active {
+        background: #0f172a;
+        border-color: #0f172a;
+        color: #fff;
+    }
+
+    .framework-shell {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .framework-shell:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.10) !important;
+    }
+
+    .framework-icon {
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.65rem;
+    }
+
+    .framework-outcome {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+
+    .framework-step {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 1rem;
+        align-items: center;
+        padding: 1rem 1.1rem;
+        border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+    }
+
+    .step-number {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 999px;
+        background: #e2e8f0;
+        color: #0f172a;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.95rem;
+        flex-shrink: 0;
+    }
+
+    .framework-step h3 {
+        margin: 0 0 0.2rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .framework-step p {
+        margin: 0;
+        font-size: 0.92rem;
+        color: #64748b;
+    }
+
+    .framework-card.is-hidden {
+        display: none;
+    }
+
+    @media (max-width: 991.98px) {
+        .framework-step {
+            grid-template-columns: auto 1fr;
+        }
+
+        .framework-step .btn {
+            grid-column: 1 / -1;
+            width: 100%;
+        }
+
+        .framework-meta {
+            text-align: left !important;
+        }
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('frameworkSearch');
+        const filterButtons = Array.from(document.querySelectorAll('.btn-filter'));
+        const cards = Array.from(document.querySelectorAll('.framework-card'));
+        const emptyState = document.getElementById('frameworkEmptyState');
+        let activeFilter = 'all';
+
+        function applyFilters() {
+            const query = (searchInput?.value || '').trim().toLowerCase();
+            let visibleCount = 0;
+
+            cards.forEach((card) => {
+                const category = card.dataset.category || '';
+                const haystack = card.dataset.search || '';
+                const matchesFilter = activeFilter === 'all' || category === activeFilter;
+                const matchesQuery = !query || haystack.includes(query);
+                const isVisible = matchesFilter && matchesQuery;
+
+                card.classList.toggle('is-hidden', !isVisible);
+                if (isVisible) visibleCount += 1;
+            });
+
+            emptyState.classList.toggle('d-none', visibleCount > 0);
+        }
+
+        filterButtons.forEach((button) => {
+            button.addEventListener('click', function () {
+                activeFilter = button.dataset.filter || 'all';
+                filterButtons.forEach((btn) => btn.classList.toggle('active', btn === button));
+                applyFilters();
+            });
+        });
+
+        searchInput?.addEventListener('input', applyFilters);
+        applyFilters();
+    });
+</script>
 {% endblock %}
