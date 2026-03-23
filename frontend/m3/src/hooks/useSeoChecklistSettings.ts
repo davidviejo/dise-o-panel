@@ -5,7 +5,7 @@ import { SeoChecklistSettings } from '../types/seoChecklist';
 const DEFAULT_SETTINGS: SeoChecklistSettings = {
   serp: {
     enabled: false,
-    provider: 'serpapi',
+    provider: 'dataforseo',
     maxKeywordsPerUrl: 10,
     maxCompetitorsPerKeyword: 3,
     dataforseoLogin: '',

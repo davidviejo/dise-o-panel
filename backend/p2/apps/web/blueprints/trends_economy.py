@@ -143,10 +143,10 @@ def worker_realtime_trends(job_id, geo, category, api_key=None):
         geo = geo.strip().upper()
 
         # Determinar proveedor y credenciales
-        provider = 'auto'
+        provider = 'dataforseo'
         credentials = {}
 
-        # 1. SerpApi via UI (Prioridad máxima)
+        # 1. SerpApi via UI (prioridad explícita del usuario)
         if api_key and len(api_key.strip()) > 10:
             provider = 'serpapi'
             credentials['api_key'] = api_key.strip()
@@ -161,24 +161,20 @@ def worker_realtime_trends(job_id, geo, category, api_key=None):
             dfs_login = os.getenv('DATAFORSEO_LOGIN') or settings.get('dataforseo_login')
             dfs_pass = os.getenv('DATAFORSEO_PASSWORD') or settings.get('dataforseo_password')
 
-            if env_provider == 'dataforseo':
-                if dfs_login and dfs_pass:
-                    provider = 'dataforseo'
-                    credentials['login'] = dfs_login
-                    credentials['password'] = dfs_pass
-                    update_job_status(job_id, {'log_append': "🛠️ Usando DataForSEO..."}, conn=conn)
-                else:
-                    update_job_status(job_id, {'log_append': "⚠️ DataForSEO configurado pero faltan credenciales. Usando interno."}, conn=conn)
+            serp_key = os.getenv('SERPAPI_KEY') or settings.get('serpapi_key')
 
-            elif env_provider == 'serpapi':
-                serp_key = os.getenv('SERPAPI_KEY') or settings.get('serpapi_key')
-                if serp_key:
-                    provider = 'serpapi'
-                    credentials['api_key'] = serp_key
-                    update_job_status(job_id, {'log_append': "🔑 Usando SerpApi (Config)..."}, conn=conn)
-
-            if provider == 'auto':
-                 update_job_status(job_id, {'log_append': "🌐 Usando Google Trends (Interno)..."}, conn=conn)
+            if env_provider == 'serpapi' and serp_key:
+                provider = 'serpapi'
+                credentials['api_key'] = serp_key
+                update_job_status(job_id, {'log_append': "🔑 Usando SerpApi (Config)..."}, conn=conn)
+            elif dfs_login and dfs_pass:
+                provider = 'dataforseo'
+                credentials['login'] = dfs_login
+                credentials['password'] = dfs_pass
+                update_job_status(job_id, {'log_append': "🛠️ Usando DataForSEO (predeterminado)..."}, conn=conn)
+            else:
+                provider = 'internal'
+                update_job_status(job_id, {'log_append': "⚠️ DataForSEO no está disponible. Usando Google Trends (interno)."}, conn=conn)
 
         # Ejecutar estrategia
         update_job_status(job_id, {'progress': 50}, conn=conn)
