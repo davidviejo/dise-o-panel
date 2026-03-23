@@ -3,6 +3,22 @@ import { useProject } from '../context/ProjectContext';
 import { SeoPage, ChecklistKey, ChecklistItem } from '../types/seoChecklist';
 
 const normalizeKeyword = (keyword?: string) => (keyword || '').trim().toLowerCase();
+const isUsableKeyword = (keyword?: string) => {
+  const normalized = normalizeKeyword(keyword);
+  return Boolean(normalized) && normalized !== '-';
+};
+
+const getKeywordCandidate = (page: SeoPage) => {
+  if (isUsableKeyword(page.kwPrincipal)) {
+    return page.kwPrincipal.trim();
+  }
+
+  if (isUsableKeyword(page.originalKwPrincipal)) {
+    return page.originalKwPrincipal!.trim();
+  }
+
+  return '';
+};
 
 const getPagePerformanceScore = (page: SeoPage) => {
   const clicks = page.gscMetrics?.clicks || 0;
@@ -37,8 +53,9 @@ export const enforceUniquePrimaryKeywords = (pages: SeoPage[]) => {
   pages.forEach((page) => {
     if (page.isBrandKeyword) return;
 
-    const normalizedKeyword = normalizeKeyword(page.kwPrincipal);
-    if (!normalizedKeyword || normalizedKeyword === '-') return;
+    const keywordCandidate = getKeywordCandidate(page);
+    const normalizedKeyword = normalizeKeyword(keywordCandidate);
+    if (!isUsableKeyword(keywordCandidate)) return;
 
     const currentWinnerId = winners.get(normalizedKeyword);
     if (!currentWinnerId) {
@@ -53,18 +70,29 @@ export const enforceUniquePrimaryKeywords = (pages: SeoPage[]) => {
   });
 
   return pages.map((page) => {
-    if (page.isBrandKeyword) return page;
+    const keywordCandidate = getKeywordCandidate(page);
+    const normalizedKeyword = normalizeKeyword(keywordCandidate);
+    const nextOriginalKeyword = isUsableKeyword(keywordCandidate) ? keywordCandidate : undefined;
 
-    const normalizedKeyword = normalizeKeyword(page.kwPrincipal);
-    if (!normalizedKeyword || normalizedKeyword === '-') return page;
+    if (page.isBrandKeyword || !isUsableKeyword(keywordCandidate)) {
+      return {
+        ...page,
+        originalKwPrincipal: nextOriginalKeyword,
+      };
+    }
 
     if (winners.get(normalizedKeyword) === page.id) {
-      return page;
+      return {
+        ...page,
+        kwPrincipal: keywordCandidate,
+        originalKwPrincipal: keywordCandidate,
+      };
     }
 
     return {
       ...page,
       kwPrincipal: '',
+      originalKwPrincipal: keywordCandidate,
     };
   });
 };

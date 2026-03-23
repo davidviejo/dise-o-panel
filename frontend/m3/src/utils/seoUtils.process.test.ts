@@ -46,6 +46,85 @@ describe('processAnalysisResult', () => {
     expect(updates.checklist?.OPORTUNIDADES.suggested_status).toBe('NO');
   });
 
+  it('should expose the primary keyword in oportunidades autoData even without GSC data', () => {
+    const updates = processAnalysisResult(mockPage, { pageId: 'page-1', items: {} }, []);
+
+    expect(updates.checklist?.OPORTUNIDADES.autoData.primaryKeyword).toBe('test');
+    expect(updates.checklist?.OPORTUNIDADES.autoData.isBrandKeyword).toBe(false);
+    expect(updates.checklist?.OPORTUNIDADES.autoData.kwPrincipalInGSC).toBeUndefined();
+  });
+
+  it('should assign a non-brand primary keyword from GSC when the page has none', () => {
+    const pageWithoutKeyword: SeoPage = {
+      ...mockPage,
+      kwPrincipal: '',
+    };
+    const gscQueries = [
+      {
+        keys: ['brand kw'],
+        query: 'brand kw',
+        clicks: 100,
+        impressions: 200,
+        ctr: 0.5,
+        position: 1,
+      },
+      {
+        keys: ['seo checklist'],
+        query: 'seo checklist',
+        clicks: 25,
+        impressions: 150,
+        ctr: 0.16,
+        position: 2,
+      },
+    ];
+
+    localStorage.setItem(
+      'mediaflow_seo_settings_test',
+      JSON.stringify({ brandTerms: ['brand kw'] }),
+    );
+
+    const updates = processAnalysisResult(
+      pageWithoutKeyword,
+      { pageId: 'page-1', items: {} },
+      gscQueries,
+    );
+
+    expect(updates.kwPrincipal).toBe('seo checklist');
+    expect(updates.originalKwPrincipal).toBe('seo checklist');
+    expect(updates.checklist?.OPORTUNIDADES.autoData.primaryKeyword).toBe('seo checklist');
+  });
+
+  it('should never assign a brand keyword as primary keyword from GSC', () => {
+    const pageWithoutKeyword: SeoPage = {
+      ...mockPage,
+      kwPrincipal: '',
+    };
+    const gscQueries = [
+      {
+        keys: ['brand kw'],
+        query: 'brand kw',
+        clicks: 100,
+        impressions: 200,
+        ctr: 0.5,
+        position: 1,
+      },
+    ];
+
+    localStorage.setItem(
+      'mediaflow_seo_settings_test',
+      JSON.stringify({ brandTerms: ['brand kw'] }),
+    );
+
+    const updates = processAnalysisResult(
+      pageWithoutKeyword,
+      { pageId: 'page-1', items: {} },
+      gscQueries,
+    );
+
+    expect(updates.kwPrincipal).toBe('');
+    expect(updates.checklist?.OPORTUNIDADES.autoData.primaryKeyword).toBe('');
+  });
+
   it('should inject GSC queries if provided', () => {
     const gscQueries = [{ keys: ['test'], clicks: 10 }];
     const result = {
@@ -78,7 +157,7 @@ describe('processAnalysisResult', () => {
     expect(updates.checklist?.OPORTUNIDADES.autoData.gscQueries[0].keys[0]).toBe('existing');
   });
 
-  it('should preserve the current primary keyword placeholder when it is missing', () => {
+  it('should assign a non-brand primary keyword when the current value is a dash placeholder', () => {
     const pageWithoutKeyword: SeoPage = {
       ...mockPage,
       kwPrincipal: '-',
@@ -94,7 +173,8 @@ describe('processAnalysisResult', () => {
       gscQueries,
     );
 
-    expect(updates.kwPrincipal).toBe('-');
+    expect(updates.kwPrincipal).toBe('best kw');
+    expect(updates.originalKwPrincipal).toBe('best kw');
   });
 
   it('should store exact page GSC metrics when they are provided', () => {

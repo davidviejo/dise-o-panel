@@ -2,7 +2,7 @@ import { SeoPage, ChecklistKey, AnalysisConfigPayload } from '../types/seoCheckl
 import { analyzeUrl, AnalysisResponse } from '../services/pythonEngineClient';
 import { getPageMetrics, getPageQueries } from '../services/googleSearchConsole';
 import { normalizeSeoPageInput } from './seoUrlNormalizer';
-
+import { isBrandTermMatch } from './brandTerms';
 
 const normalizeGscQueryRow = (row: any) => {
   const query = row?.query || row?.keys?.[0] || '';
@@ -13,8 +13,49 @@ const normalizeGscQueryRow = (row: any) => {
   };
 };
 
+const getStoredBrandTerms = (): string[] => {
+  const settingsKey = Object.keys(localStorage).find((key) =>
+    key.startsWith('mediaflow_seo_settings_'),
+  );
+  if (!settingsKey) return [];
+
+  try {
+    const raw = localStorage.getItem(settingsKey);
+    const parsed = raw ? JSON.parse(raw) : null;
+    return Array.isArray(parsed?.brandTerms) ? parsed.brandTerms : [];
+  } catch (error) {
+    console.warn('Could not parse SEO checklist settings', error);
+    return [];
+  }
+};
+
+const isUsablePrimaryKeyword = (keyword?: string) => {
+  const normalized = (keyword || '').trim();
+  return normalized.length > 0 && normalized !== '-';
+};
+
+const pickPrimaryKeywordFromQueries = (gscQueries: any[] = [], brandTerms: string[] = []) => {
+  const sortedQueries = [...gscQueries]
+    .map(normalizeGscQueryRow)
+    .filter((row) => isUsablePrimaryKeyword(row.query))
+    .filter((row) => !isBrandTermMatch(row.query, brandTerms))
+    .sort((a, b) => {
+      if ((b.clicks || 0) !== (a.clicks || 0)) {
+        return (b.clicks || 0) - (a.clicks || 0);
+      }
+      if ((b.impressions || 0) !== (a.impressions || 0)) {
+        return (b.impressions || 0) - (a.impressions || 0);
+      }
+      return (a.position || Number.POSITIVE_INFINITY) - (b.position || Number.POSITIVE_INFINITY);
+    });
+
+  return sortedQueries[0]?.query?.trim() || '';
+};
+
 const buildDefaultAnalysisConfig = (): AnalysisConfigPayload => {
-  const raw = localStorage.getItem(Object.keys(localStorage).find((key) => key.startsWith('mediaflow_seo_settings_')) || '');
+  const raw = localStorage.getItem(
+    Object.keys(localStorage).find((key) => key.startsWith('mediaflow_seo_settings_')) || '',
+  );
   let parsed = null;
   try {
     parsed = raw ? JSON.parse(raw) : null;
@@ -111,6 +152,12 @@ export const processAnalysisResult = (
   // We'll follow the original logic: ensure the structure exists, then inject/overwrite if gscQueries is not empty.
 
   const normalizedGscQueries = gscQueries.map(normalizeGscQueryRow);
+  const brandTerms = getStoredBrandTerms();
+  const resolvedPrimaryKeyword = page.isBrandKeyword
+    ? ''
+    : isUsablePrimaryKeyword(page.kwPrincipal) && !isBrandTermMatch(page.kwPrincipal, brandTerms)
+      ? page.kwPrincipal.trim()
+      : pickPrimaryKeywordFromQueries(normalizedGscQueries, brandTerms);
 
   if (normalizedGscQueries.length > 0 || !result.items?.OPORTUNIDADES?.autoData?.gscQueries) {
     if (!result.items) {
@@ -123,19 +170,25 @@ export const processAnalysisResult = (
       result.items.OPORTUNIDADES.autoData = {};
     }
 
+    const normalizedPrimaryKeyword = resolvedPrimaryKeyword;
+    result.items.OPORTUNIDADES.autoData.primaryKeyword = normalizedPrimaryKeyword;
+    result.items.OPORTUNIDADES.autoData.isBrandKeyword = Boolean(page.isBrandKeyword);
+
     if (normalizedGscQueries.length > 0) {
       result.items.OPORTUNIDADES.autoData.gscQueries = normalizedGscQueries;
     }
 
     // Calculate kwFound if GSC data is present (either just injected or already there)
     const currentGscQueries = result.items.OPORTUNIDADES.autoData.gscQueries || [];
-    if (currentGscQueries.length > 0) {
-      const normalizedKw = page.kwPrincipal.toLowerCase().trim();
+    if (currentGscQueries.length > 0 && normalizedPrimaryKeyword) {
+      const normalizedKw = normalizedPrimaryKeyword.toLowerCase();
       const kwFound = currentGscQueries.some((q: any) => {
         const query = q.query || q.keys?.[0] || '';
         return query.toLowerCase().trim() === normalizedKw;
       });
       result.items.OPORTUNIDADES.autoData.kwPrincipalInGSC = kwFound;
+    } else {
+      result.items.OPORTUNIDADES.autoData.kwPrincipalInGSC = undefined;
     }
   }
 
@@ -143,7 +196,9 @@ export const processAnalysisResult = (
     gscMetrics || page.gscMetrics || buildGscMetricsFromQueries(gscQueries);
   const updates: Partial<SeoPage> = {
     url: page.url,
-    kwPrincipal: page.kwPrincipal,
+    kwPrincipal: resolvedPrimaryKeyword,
+    originalKwPrincipal: resolvedPrimaryKeyword || page.originalKwPrincipal,
+    isBrandKeyword: page.isBrandKeyword || false,
     gscMetrics: resolvedGscMetrics,
     lastAnalyzedAt: Date.now(),
     checklist: { ...page.checklist },
