@@ -7,11 +7,30 @@ interface AuthResponse {
   error?: string;
 }
 
-// Configurado para producción y local usando variables de entorno con fallback inteligente
 const API_URL = resolveApiUrl();
+const DEFAULT_TIMEOUT_MS = 12000;
+
+const fetchJson = async <T>(
+  input: RequestInfo | URL,
+  init: RequestInit = {},
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+): Promise<T> => {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(input, { ...init, signal: controller.signal });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error((data && data.error) || 'Request failed');
+    }
+    return data as T;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+};
 
 export const api = {
-  // Helper to get headers with token
   getHeaders: () => {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -23,15 +42,13 @@ export const api = {
     return headers;
   },
 
-  // Auth Methods
   authClientsArea: async (password: string): Promise<AuthResponse> => {
-    const res = await fetch(`${API_URL}/api/auth/clients-area`, {
+    const data = await fetchJson<AuthResponse>(`${API_URL}/api/auth/clients-area`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password }),
     });
-    const data = await res.json();
-    if (res.ok && data.token) {
+    if (data.token) {
       sessionStorage.setItem('portal_token', data.token);
       sessionStorage.setItem('portal_role', data.role);
     }
@@ -39,13 +56,12 @@ export const api = {
   },
 
   authProject: async (slug: string, password: string): Promise<AuthResponse> => {
-    const res = await fetch(`${API_URL}/api/auth/project/${slug}`, {
+    const data = await fetchJson<AuthResponse>(`${API_URL}/api/auth/project/${slug}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password }),
     });
-    const data = await res.json();
-    if (res.ok && data.token) {
+    if (data.token) {
       sessionStorage.setItem('portal_token', data.token);
       sessionStorage.setItem('portal_role', data.role);
       sessionStorage.setItem('portal_scope', data.scope || '');
@@ -54,13 +70,12 @@ export const api = {
   },
 
   authOperator: async (password: string): Promise<AuthResponse> => {
-    const res = await fetch(`${API_URL}/api/auth/operator`, {
+    const data = await fetchJson<AuthResponse>(`${API_URL}/api/auth/operator`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password }),
     });
-    const data = await res.json();
-    if (res.ok && data.token) {
+    if (data.token) {
       sessionStorage.setItem('portal_token', data.token);
       sessionStorage.setItem('portal_role', data.role);
     }
@@ -74,37 +89,20 @@ export const api = {
     window.location.href = '/';
   },
 
-  // Data Methods
-  getClients: async () => {
-    const res = await fetch(`${API_URL}/api/clients`, {
-      headers: api.getHeaders(),
-    });
-    if (!res.ok) throw new Error('Failed to fetch clients');
-    return res.json();
-  },
+  getClients: async () => fetchJson(`${API_URL}/api/clients`, { headers: api.getHeaders() }),
 
-  getPublicClients: async () => {
-    const res = await fetch(`${API_URL}/api/public/clients`, {
+  getPublicClients: async () =>
+    fetchJson(`${API_URL}/api/public/clients`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-    });
-    if (!res.ok) throw new Error('Failed to fetch public clients');
-    return res.json();
-  },
+    }),
 
-  getProjectOverview: async (slug: string) => {
-    const res = await fetch(`${API_URL}/api/${slug}/overview`, {
-      headers: api.getHeaders(),
-    });
-    if (!res.ok) throw new Error('Failed to fetch project overview');
-    return res.json();
-  },
+  getProjectOverview: async (slug: string) =>
+    fetchJson(`${API_URL}/api/${slug}/overview`, { headers: api.getHeaders() }),
 
-  runOperatorTool: async (tool: string) => {
-    const res = await fetch(`${API_URL}/api/tools/run/${tool}`, {
+  runOperatorTool: async (tool: string) =>
+    fetchJson(`${API_URL}/api/tools/run/${tool}`, {
       method: 'POST',
       headers: api.getHeaders(),
-    });
-    return res.json();
-  },
+    }),
 };

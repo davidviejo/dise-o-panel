@@ -1,19 +1,8 @@
 from flask import Blueprint, request, jsonify, current_app
 from apps.auth_utils import check_global_password, create_token, check_password_hash
-import json
-import os
+from apps.web.clients_store import find_client_by_slug
 
 auth_bp = Blueprint('auth_bp', __name__)
-
-def get_clients_db():
-    try:
-        # Use absolute path to ensure the file is found regardless of CWD
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        file_path = os.path.join(base_dir, '..', 'data', 'clients_db.json')
-        with open(file_path, 'r') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
 
 @auth_bp.route('/api/auth/clients-area', methods=['POST'])
 def auth_clients_area():
@@ -43,8 +32,7 @@ def auth_project(slug):
         return jsonify({'token': token, 'role': 'operator'})
 
     # Check project password
-    clients = get_clients_db()
-    project = next((c for c in clients if c.get('slug') == slug), None)
+    project = find_client_by_slug(slug)
 
     if not project:
         return jsonify({'error': 'Project not found'}), 404

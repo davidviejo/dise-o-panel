@@ -1,20 +1,9 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, make_response
 from apps.auth_utils import verify_token
-import json
-import os
+from apps.web.clients_store import get_safe_clients
 from functools import wraps
 
 portal_bp = Blueprint('portal_bp', __name__)
-
-def get_clients_db():
-    try:
-        # Use absolute path to ensure the file is found regardless of CWD
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        file_path = os.path.join(base_dir, '..', 'data', 'clients_db.json')
-        with open(file_path, 'r') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
 
 def require_role(allowed_roles):
     def decorator(f):
@@ -48,32 +37,13 @@ def require_role(allowed_roles):
 @portal_bp.route('/api/clients', methods=['GET'])
 @require_role(['clients_area', 'operator'])
 def list_clients():
-    clients = get_clients_db()
-    # Filter sensitive data like password hash
-    safe_clients = []
-    for c in clients:
-        safe_clients.append({
-            'slug': c.get('slug'),
-            'name': c.get('name'),
-            'status': c.get('status'),
-            'description': c.get('description')
-        })
-    return jsonify(safe_clients)
+    return jsonify(get_safe_clients())
 
 @portal_bp.route('/api/public/clients', methods=['GET'])
 def list_public_clients():
-    clients = get_clients_db()
-    # Filter sensitive data like password hash
-    safe_clients = []
-    for c in clients:
-        # Only show active clients if needed, but requirements just said "as they are created"
-        safe_clients.append({
-            'slug': c.get('slug'),
-            'name': c.get('name'),
-            'status': c.get('status'),
-            'description': c.get('description')
-        })
-    return jsonify(safe_clients)
+    response = make_response(jsonify(get_safe_clients()))
+    response.headers['Cache-Control'] = 'public, max-age=60, stale-while-revalidate=300'
+    return response
 
 @portal_bp.route('/api/<slug>/overview', methods=['GET'])
 @require_role(['project', 'clients_area', 'operator'])

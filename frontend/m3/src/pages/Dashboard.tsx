@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ResponsiveContainer,
   BarChart,
@@ -108,56 +108,68 @@ const Dashboard: React.FC<DashboardProps> = ({ modules, globalScore }) => {
     },
   } = useGSCData(gscAccessToken, startDate, endDate);
 
-  // Determine Rank Badge
-  let badge = { title: 'Becario SEO', color: 'bg-slate-100 text-slate-600' };
-  if (globalScore >= 20) badge = { title: 'Analista Junior', color: 'bg-blue-100 text-blue-700' };
-  if (globalScore >= 40) badge = { title: 'Estratega SEO', color: 'bg-indigo-100 text-indigo-700' };
-  if (globalScore >= 60)
-    badge = { title: 'Líder Técnico SEO', color: 'bg-purple-100 text-purple-700' };
-  if (globalScore >= 80)
-    badge = { title: 'Jefe de Audiencias', color: 'bg-amber-100 text-amber-700' };
-  if (globalScore >= 95)
-    badge = { title: 'Chief SEO Officer', color: 'bg-emerald-100 text-emerald-700' };
+  const badge = useMemo(() => {
+    if (globalScore >= 95)
+      return { title: 'Chief SEO Officer', color: 'bg-emerald-100 text-emerald-700' };
+    if (globalScore >= 80)
+      return { title: 'Jefe de Audiencias', color: 'bg-amber-100 text-amber-700' };
+    if (globalScore >= 60)
+      return { title: 'Líder Técnico SEO', color: 'bg-purple-100 text-purple-700' };
+    if (globalScore >= 40)
+      return { title: 'Estratega SEO', color: 'bg-indigo-100 text-indigo-700' };
+    if (globalScore >= 20) return { title: 'Analista Junior', color: 'bg-blue-100 text-blue-700' };
+    return { title: 'Becario SEO', color: 'bg-slate-100 text-slate-600' };
+  }, [globalScore]);
 
   // Calculate progress per module
-  const chartData = modules.map((m) => {
-    const total = m.tasks.length;
-    const completed = m.tasks.filter((t) => t.status === 'completed').length;
-    const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
-    return {
-      name: `M${m.id}`,
-      fullTitle: m.title,
-      score: percentage,
-      color: percentage === 100 ? '#10b981' : percentage > 50 ? '#3b82f6' : '#94a3b8',
-    };
-  });
+  const chartData = useMemo(
+    () =>
+      modules.map((m) => {
+        const total = m.tasks.length;
+        const completed = m.tasks.filter((t) => t.status === 'completed').length;
+        const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+        return {
+          name: `M${m.id}`,
+          fullTitle: m.title,
+          score: percentage,
+          color: percentage === 100 ? '#10b981' : percentage > 50 ? '#3b82f6' : '#94a3b8',
+        };
+      }),
+    [modules],
+  );
 
   // Calculate Radar Data
-  const categoryScores: Record<string, { total: number; completed: number }> = {};
-  modules.forEach((m) => {
-    m.tasks.forEach((t) => {
-      const cat = t.category || 'General';
-      if (!categoryScores[cat]) {
-        categoryScores[cat] = { total: 0, completed: 0 };
-      }
-      categoryScores[cat].total += 1;
-      if (t.status === 'completed') {
-        categoryScores[cat].completed += 1;
-      }
+  const radarData = useMemo(() => {
+    const categoryScores: Record<string, { total: number; completed: number }> = {};
+    modules.forEach((m) => {
+      m.tasks.forEach((t) => {
+        const cat = t.category || 'General';
+        if (!categoryScores[cat]) {
+          categoryScores[cat] = { total: 0, completed: 0 };
+        }
+        categoryScores[cat].total += 1;
+        if (t.status === 'completed') {
+          categoryScores[cat].completed += 1;
+        }
+      });
     });
-  });
 
-  const radarData = Object.keys(categoryScores).map((cat) => ({
-    subject: cat,
-    A: Math.round((categoryScores[cat].completed / categoryScores[cat].total) * 100),
-    fullMark: 100,
-  }));
+    return Object.keys(categoryScores).map((cat) => ({
+      subject: cat,
+      A: Math.round((categoryScores[cat].completed / categoryScores[cat].total) * 100),
+      fullMark: 100,
+    }));
+  }, [modules]);
 
-  const nextModule = modules.find((m) => {
-    const total = m.tasks.length;
-    const completed = m.tasks.filter((t) => t.status === 'completed').length;
-    return completed < total;
-  });
+  const nextModule = useMemo(
+    () =>
+      modules.find((m) => {
+        const total = m.tasks.length;
+        const completed = m.tasks.filter((t) => t.status === 'completed').length;
+        return completed < total;
+      }),
+    [modules],
+  );
 
   // --------------------
 
