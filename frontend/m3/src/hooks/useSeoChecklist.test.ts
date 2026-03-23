@@ -54,4 +54,30 @@ describe('enforceUniquePrimaryKeywords', () => {
     expect(result.find((page) => page.id === 'page-a')?.kwPrincipal).toBe('');
     expect(result.find((page) => page.id === 'page-c')?.kwPrincipal).toBe('otra kw');
   });
+
+  it('reassigns a preserved keyword to another non-brand URL when the current holder becomes brand', () => {
+    const pages = [
+      buildPage({
+        id: 'page-a',
+        url: 'https://example.com/a',
+        kwPrincipal: '',
+        originalKwPrincipal: 'kw compartida',
+        gscMetrics: { clicks: 10, impressions: 100, ctr: 0.1, position: 4 },
+      }),
+      buildPage({
+        id: 'page-b',
+        url: 'https://example.com/b',
+        kwPrincipal: 'kw compartida',
+        originalKwPrincipal: 'kw compartida',
+        isBrandKeyword: true,
+        gscMetrics: { clicks: 25, impressions: 80, ctr: 0.3125, position: 3 },
+      }),
+    ];
+
+    const result = enforceUniquePrimaryKeywords(pages);
+
+    expect(result.find((page) => page.id === 'page-a')?.kwPrincipal).toBe('kw compartida');
+    expect(result.find((page) => page.id === 'page-a')?.originalKwPrincipal).toBe('kw compartida');
+    expect(result.find((page) => page.id === 'page-b')?.kwPrincipal).toBe('kw compartida');
+  });
 });

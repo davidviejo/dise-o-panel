@@ -395,33 +395,54 @@ export const ChecklistItem: React.FC<Props> = ({ item, onChange }) => {
       const {
         gscQueries,
         kwPrincipalInGSC,
+        primaryKeyword,
+        isBrandKeyword,
         zeroClickHighImpressionKeywords,
         serpResults,
         clustering,
       } = item.autoData;
+      const hasPrimaryKeyword =
+        typeof primaryKeyword === 'string' && primaryKeyword.trim().length > 0;
+      const hasGscQueries = Array.isArray(gscQueries) && gscQueries.length > 0;
 
       return (
         <div className="space-y-4">
           {renderAdvancedWarning()}
 
-          {/* Always show kwPrincipalInGSC status */}
-          <div
-            className={`p-3 rounded-lg border flex items-center gap-3 ${
-              kwPrincipalInGSC
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-300'
-                : 'bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300'
-            }`}
-          >
-            {kwPrincipalInGSC ? <CheckCircle2 size={20} /> : <Info size={20} />}
-            <div className="text-sm font-medium">
-              {kwPrincipalInGSC
-                ? 'La Keyword Principal aparece en GSC (Top 50).'
-                : 'La Keyword Principal NO aparece en GSC (Top 50).'}
+          <div className="p-3 rounded-lg border bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-1 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">
+              <Target size={14} /> Keyword principal
+            </div>
+            <div className="text-sm font-semibold text-slate-900 dark:text-white break-words">
+              {hasPrimaryKeyword
+                ? primaryKeyword
+                : isBrandKeyword
+                  ? 'KW de marca excluida del análisis principal'
+                  : 'Sin keyword principal asignada'}
             </div>
           </div>
 
+          {hasPrimaryKeyword ? (
+            <div
+              className={`p-3 rounded-lg border flex items-center gap-3 ${
+                kwPrincipalInGSC
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-300'
+                  : 'bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300'
+              }`}
+            >
+              {kwPrincipalInGSC ? <CheckCircle2 size={20} /> : <Info size={20} />}
+              <div className="text-sm font-medium">
+                {hasGscQueries
+                  ? kwPrincipalInGSC
+                    ? 'La Keyword Principal aparece en GSC (Top 50).'
+                    : 'La Keyword Principal NO aparece en GSC (Top 50).'
+                  : 'No hay datos de GSC para validar la keyword principal.'}
+              </div>
+            </div>
+          ) : null}
+
           {/* Always show GSC Table if queries exist */}
-          {Array.isArray(gscQueries) && gscQueries.length > 0 ? (
+          {hasGscQueries ? (
             <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-lg">
               <table className="w-full text-sm text-left">
                 <thead className="bg-slate-50 dark:bg-slate-800 text-xs uppercase text-slate-500 font-semibold">
@@ -450,7 +471,7 @@ export const ChecklistItem: React.FC<Props> = ({ item, onChange }) => {
                   ))}
                 </tbody>
               </table>
-              {gscQueries.length > 10 && (
+              {hasGscQueries && gscQueries.length > 10 && (
                 <div className="bg-slate-50 dark:bg-slate-800 p-2 text-center text-xs text-slate-400 border-t border-slate-200 dark:border-slate-700">
                   Mostrando 10 de {gscQueries.length} consultas
                 </div>
