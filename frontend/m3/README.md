@@ -74,6 +74,8 @@ El antiguo proyecto standalone de Tendencias/Brief editorial ya no debe arrancar
 /#/app/trends-media
 ```
 
+> **Estado de migración (2026-03-30):** el código legacy de `Tendencias-medios-main/Tendencias-medios-main` fue retirado del flujo activo y archivado como referencia histórica en `Tendencias-medios-main/README.md`. El único módulo canónico es `src/features/trends-media`.
+
 Esto significa que:
 
 - se inicia con el mismo `npm run dev` del frontend principal;
