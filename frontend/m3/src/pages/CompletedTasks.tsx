@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { CompletedTask } from '../types';
 import { CheckCircle2, Calendar, Plus, ClipboardList, PenTool, Trash2 } from 'lucide-react';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
+import { useToast } from '../components/ui/ToastContext';
+import { useTranslation } from 'react-i18next';
 
 interface CompletedTasksProps {
   completedTasks: CompletedTask[];
@@ -13,9 +16,12 @@ const CompletedTasks: React.FC<CompletedTasksProps> = ({
   onAddManualTask,
   onDeleteLogEntry,
 }) => {
+  const { t } = useTranslation();
+  const { successAction } = useToast();
   const [showForm, setShowForm] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,15 +34,29 @@ const CompletedTasks: React.FC<CompletedTasksProps> = ({
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este registro del historial?')) {
-      onDeleteLogEntry(id);
-    }
+    setTaskToDelete(id);
+  };
+
+  const confirmDelete = () => {
+    if (!taskToDelete) return;
+    onDeleteLogEntry(taskToDelete);
+    successAction(t('feedback.actions.delete_history_entry'));
+    setTaskToDelete(null);
   };
 
   const sortedTasks = [...completedTasks].sort((a, b) => b.completedAt - a.completedAt);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      <ConfirmDialog
+        isOpen={!!taskToDelete}
+        title={t('feedback.confirm.delete_history_title')}
+        message={t('feedback.confirm.delete_history_message')}
+        confirmLabel={t('feedback.confirm.confirm_button')}
+        cancelLabel={t('feedback.confirm.cancel_button')}
+        onConfirm={confirmDelete}
+        onCancel={() => setTaskToDelete(null)}
+      />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">

@@ -22,6 +22,8 @@ import {
   getBatchJobItemResult,
   AnalysisResponse,
 } from '../../services/pythonEngineClient';
+import { useToast } from '../ui/ToastContext';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   jobs: BatchJobStatus[];
@@ -31,6 +33,8 @@ interface Props {
 }
 
 export const BatchJobMonitor: React.FC<Props> = ({ jobs, onClose, onApplyResult, onJobUpdate }) => {
+  const { t } = useTranslation();
+  const { errorAction, successAction } = useToast();
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'done' | 'errors' | 'queued'>('done');
   const [items, setItems] = useState<BatchJobItem[]>([]);
@@ -101,7 +105,8 @@ export const BatchJobMonitor: React.FC<Props> = ({ jobs, onClose, onApplyResult,
       const updated = await getBatchJob(selectedJobId);
       onJobUpdate(updated);
     } catch (e) {
-      alert(`Error: ${e}`);
+      console.error(e);
+      errorAction(t('feedback.actions.update_batch_job'));
     }
   };
 
@@ -112,9 +117,10 @@ export const BatchJobMonitor: React.FC<Props> = ({ jobs, onClose, onApplyResult,
       const result = await getBatchJobItemResult(selectedJobId, itemId);
       onApplyResult(result);
       setAppliedIds((prev) => new Set(prev).add(itemId));
+      successAction(t('feedback.actions.apply_batch_result'));
     } catch (e) {
       console.error('Failed to apply result', e);
-      alert('Error applying result');
+      errorAction(t('feedback.actions.apply_batch_result'));
     } finally {
       setApplyingIds((prev) => {
         const next = new Set(prev);
