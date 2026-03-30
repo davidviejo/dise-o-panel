@@ -13,3 +13,13 @@ Este directorio se mantiene **solo como marcador histórico de migración**.
 ## Nota operativa
 
 No desarrollar nuevas funcionalidades aquí. Todo cambio debe realizarse en el módulo canónico integrado en `frontend/m3`.
+
+## Auditoría de consolidación
+
+Se revisó el árbol legacy `Tendencias-medios-main/Tendencias-medios-main/*` frente a `frontend/m3/src/features/trends-media/*` y el resultado fue:
+
+- No existe código fuente activo en el árbol legacy (solo artefactos locales de dependencias).
+- El módulo canónico ya contiene servicios, tipos y componentes usados por `src/pages/TrendsMediaPage.tsx`.
+- No se detectaron imports cruzados desde el frontend integrado hacia la carpeta legacy.
+
+Por ello, no hubo lógica funcional pendiente de migración en esta consolidación y se mantiene este directorio únicamente como archivo histórico.
