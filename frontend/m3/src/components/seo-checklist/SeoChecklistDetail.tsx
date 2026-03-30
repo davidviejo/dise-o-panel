@@ -8,6 +8,7 @@ import {
 import { ChecklistItem } from './ChecklistItem';
 import { runPageAnalysis } from '../../utils/seoUtils';
 import { normalizeSeoUrl } from '../../utils/seoUrlNormalizer';
+import { isBrandTermMatch } from '../../utils/brandTerms';
 import { useSeoChecklistSettings } from '../../hooks/useSeoChecklistSettings';
 import {
   Play,
@@ -74,10 +75,13 @@ export const SeoChecklistDetail: React.FC<Props> = ({
   };
 
   const handleSave = () => {
+    const matchesBrandTerm = isBrandTermMatch(editForm.kwPrincipal, settings.brandTerms);
+    const isBrandKeyword = matchesBrandTerm ? true : editForm.isBrandKeyword;
+
     onUpdatePage(page.id, {
       url: normalizeSeoUrl(editForm.url),
-      kwPrincipal: editForm.isBrandKeyword ? '' : editForm.kwPrincipal,
-      isBrandKeyword: editForm.isBrandKeyword,
+      kwPrincipal: isBrandKeyword ? '' : editForm.kwPrincipal,
+      isBrandKeyword,
       pageType: editForm.pageType,
       cluster: editForm.cluster,
       competitors: editForm.competitors,
