@@ -29,8 +29,20 @@ import { DEFAULT_KANBAN_COLUMNS } from '../config/kanban';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
+import { useToast } from '../components/ui/ToastContext';
+import { useTranslation } from 'react-i18next';
+
+interface ConfirmState {
+  title: string;
+  message: string;
+  onConfirm: () => void;
+  isDestructive?: boolean;
+}
 
 const KanbanBoard: React.FC = () => {
+  const { t } = useTranslation();
+  const { successAction } = useToast();
   const {
     modules,
     addTasksBulk,
@@ -46,6 +58,7 @@ const KanbanBoard: React.FC = () => {
   const [isAddingColumn, setIsAddingColumn] = useState(false);
   const [newColumnTitle, setNewColumnTitle] = useState('');
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
 
   // New task creation state
   const [isAddingTask, setIsAddingTask] = useState<{ columnId: string } | null>(null);
@@ -171,6 +184,19 @@ const KanbanBoard: React.FC = () => {
 
   return (
     <div className="page-shell h-full flex flex-col">
+      <ConfirmDialog
+        isOpen={!!confirmState}
+        title={confirmState?.title || ''}
+        message={confirmState?.message || ''}
+        confirmLabel={t('feedback.confirm.confirm_button')}
+        cancelLabel={t('feedback.confirm.cancel_button')}
+        onConfirm={() => {
+          confirmState?.onConfirm();
+          setConfirmState(null);
+        }}
+        onCancel={() => setConfirmState(null)}
+        isDestructive={confirmState?.isDestructive ?? true}
+      />
       <div className="mb-6 flex justify-between items-center">
         <div>
           <h1 className="section-title mb-2">Tablero Kanban</h1>
@@ -229,11 +255,14 @@ const KanbanBoard: React.FC = () => {
                     {!DEFAULT_KANBAN_COLUMNS.some((c) => c.id === column.id) && (
                       <button
                         onClick={() => {
-                          if (
-                            window.confirm('¿Borrar esta columna? Las tareas volverán a Pendiente.')
-                          ) {
-                            deleteKanbanColumn(column.id);
-                          }
+                          setConfirmState({
+                            title: t('feedback.confirm.delete_column_title'),
+                            message: t('feedback.confirm.delete_column_message'),
+                            onConfirm: () => {
+                              deleteKanbanColumn(column.id);
+                              successAction(t('feedback.actions.delete_column'));
+                            },
+                          });
                         }}
                         className="opacity-0 group-hover/col:opacity-100 text-muted hover:text-danger transition-opacity"
                       >
@@ -300,13 +329,14 @@ const KanbanBoard: React.FC = () => {
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      if (
-                                        window.confirm(
-                                          '¿Seguro que quieres eliminar esta tarea completada del tablero?',
-                                        )
-                                      ) {
-                                        deleteTask(item.moduleId, item.task.id);
-                                      }
+                                      setConfirmState({
+                                        title: t('feedback.confirm.delete_completed_task_title'),
+                                        message: t('feedback.confirm.delete_completed_task_message'),
+                                        onConfirm: () => {
+                                          deleteTask(item.moduleId, item.task.id);
+                                          successAction(t('feedback.actions.delete_completed_task'));
+                                        },
+                                      });
                                     }}
                                     className="text-slate-400 hover:text-rose-500 transition-colors p-1"
                                     title="Eliminar tarea completada"

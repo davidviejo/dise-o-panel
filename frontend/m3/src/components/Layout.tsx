@@ -39,6 +39,8 @@ import NotesPanel from './NotesPanel';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './ui/LanguageSwitcher';
 import { InternalShell } from './shell/ShellVariants';
+import ConfirmDialog from './ui/ConfirmDialog';
+import { useToast } from './ui/ToastContext';
 
 interface NavItemProps {
   to: string;
@@ -118,6 +120,7 @@ const Layout: React.FC<LayoutProps> = ({
   onDeleteNote = () => {},
 }) => {
   const { t } = useTranslation();
+  const { successAction } = useToast();
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -126,6 +129,7 @@ const Layout: React.FC<LayoutProps> = ({
   );
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [isEmergencyLoading, setIsEmergencyLoading] = useState(false);
+  const [showEmergencyConfirm, setShowEmergencyConfirm] = useState(false);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const activeTab = useMemo<TabType>(() => {
     const path = location.pathname;
@@ -192,17 +196,16 @@ const Layout: React.FC<LayoutProps> = ({
   };
 
   const handleEmergencyIndex = () => {
-    if (
-      confirm(
-        '¿CONFIRMAR INDEXACIÓN DE EMERGENCIA? Esto enviará un ping a la API de Indexing para URLs críticas recientes.',
-      )
-    ) {
-      setIsEmergencyLoading(true);
-      setTimeout(() => {
-        setIsEmergencyLoading(false);
-        alert('Solicitud de Indexación enviada a Google API. Espera rastreo en 2 minutos.');
-      }, 2000);
-    }
+    setShowEmergencyConfirm(true);
+  };
+
+  const confirmEmergencyIndex = () => {
+    setShowEmergencyConfirm(false);
+    setIsEmergencyLoading(true);
+    setTimeout(() => {
+      setIsEmergencyLoading(false);
+      successAction(t('feedback.actions.send_emergency_index_request'));
+    }, 2000);
   };
 
   const getIcon = (name: string) => {
@@ -531,6 +534,16 @@ const Layout: React.FC<LayoutProps> = ({
 
   return (
     <InternalShell header={header} sidebar={sidebar} contentClassName="flex-1 overflow-auto pt-16 w-full">
+      <ConfirmDialog
+        isOpen={showEmergencyConfirm}
+        title={t('feedback.confirm.emergency_index_title')}
+        message={t('feedback.confirm.emergency_index_message')}
+        confirmLabel={t('feedback.confirm.confirm_button')}
+        cancelLabel={t('feedback.confirm.cancel_button')}
+        onConfirm={confirmEmergencyIndex}
+        onCancel={() => setShowEmergencyConfirm(false)}
+        isDestructive={false}
+      />
       {/* Notes Panel */}
       <NotesPanel
         isOpen={isNotesOpen}

@@ -26,5 +26,40 @@
     "emergency_index": "INDEX DE EMERGENCIA",
     "indexing": "INDEXANDO..."
   },
-  "global_score": "Puntuación Global"
+  "global_score": "Puntuación Global",
+  "feedback": {
+    "toast": {
+      "success_action": "{{action}} completada correctamente.",
+      "error_action": "No se pudo completar: {{action}}.",
+      "warning_action": "Revisa esta acción: {{action}}."
+    },
+    "actions": {
+      "delete_history_entry": "Eliminar registro del historial",
+      "delete_task_card": "Eliminar ficha",
+      "delete_column": "Eliminar columna",
+      "delete_completed_task": "Eliminar tarea completada",
+      "restore_data": "Restaurar datos",
+      "import_backup": "Importar backup",
+      "read_json_file": "Leer archivo JSON",
+      "update_batch_job": "Actualizar lote",
+      "apply_batch_result": "Aplicar resultado del lote",
+      "send_emergency_index_request": "Enviar indexación de emergencia"
+    },
+    "confirm": {
+      "confirm_button": "Confirmar",
+      "cancel_button": "Cancelar",
+      "delete_history_title": "Eliminar registro",
+      "delete_history_message": "¿Seguro que quieres eliminar este registro del historial? Esta acción no se puede deshacer.",
+      "delete_task_title": "Eliminar ficha",
+      "delete_task_message": "¿Estás seguro de que quieres eliminar esta ficha? Esta acción no se puede deshacer.",
+      "delete_column_title": "Eliminar columna",
+      "delete_column_message": "¿Borrar esta columna? Las tareas volverán a Pendiente.",
+      "delete_completed_task_title": "Eliminar tarea completada",
+      "delete_completed_task_message": "¿Seguro que quieres eliminar esta tarea completada del tablero?",
+      "restore_backup_title": "Restaurar backup",
+      "restore_backup_message": "Se restaurarán proyectos, checklists SEO, URLs, kanban, tareas, notas y configuración. Los datos locales actuales serán reemplazados.",
+      "emergency_index_title": "Confirmar indexación de emergencia",
+      "emergency_index_message": "Esto enviará un ping a la API de Indexing para URLs críticas recientes."
+    }
+  }
 }

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { X, CheckCircle2, AlertTriangle, Info, AlertCircle } from 'lucide-react';
+import i18n from '../../i18n';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -17,6 +18,9 @@ interface ToastContextType {
   error: (message: string, duration?: number) => void;
   warning: (message: string, duration?: number) => void;
   info: (message: string, duration?: number) => void;
+  successAction: (action: string, duration?: number) => void;
+  errorAction: (action: string, duration?: number) => void;
+  warningAction: (action: string, duration?: number) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -55,8 +59,27 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const warning = (message: string, duration?: number) => addToast(message, 'warning', duration);
   const info = (message: string, duration?: number) => addToast(message, 'info', duration);
 
+  const successAction = (action: string, duration?: number) =>
+    success(i18n.t('feedback.toast.success_action', { action }), duration);
+  const errorAction = (action: string, duration?: number) =>
+    error(i18n.t('feedback.toast.error_action', { action }), duration);
+  const warningAction = (action: string, duration?: number) =>
+    warning(i18n.t('feedback.toast.warning_action', { action }), duration);
+
   return (
-    <ToastContext.Provider value={{ addToast, removeToast, success, error, warning, info }}>
+    <ToastContext.Provider
+      value={{
+        addToast,
+        removeToast,
+        success,
+        error,
+        warning,
+        info,
+        successAction,
+        errorAction,
+        warningAction,
+      }}
+    >
       {children}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
         {toasts.map((toast) => (

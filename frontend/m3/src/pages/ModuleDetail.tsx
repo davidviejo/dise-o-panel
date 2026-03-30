@@ -26,6 +26,8 @@ import { useToast } from '../components/ui/ToastContext';
 import { Skeleton } from '../components/ui/Skeleton';
 import { Spinner } from '../components/ui/Spinner';
 import ModuleTaskItem from '../components/ModuleTaskItem';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
+import { useTranslation } from 'react-i18next';
 
 interface ModuleDetailProps {
   modules: ModuleData[];
@@ -61,7 +63,8 @@ const ModuleDetail: React.FC<ModuleDetailProps> = ({
   const { id } = useParams<{ id: string }>();
   const moduleId = parseInt(id || '1', 10);
   const module = modules.find((m) => m.id === moduleId);
-  const { success: showSuccess, error: showError } = useToast();
+  const { t } = useTranslation();
+  const { success: showSuccess, error: showError, successAction } = useToast();
   const { settings } = useSettings();
 
   const [aiPrompt, setAiPrompt] = useState('');
@@ -118,6 +121,7 @@ const ModuleDetail: React.FC<ModuleDetailProps> = ({
   const [zenMode, setZenMode] = useState(false);
   const [slackSent, setSlackSent] = useState(false);
   const [showAddTask, setShowAddTask] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
   // New Task State
   const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -224,19 +228,16 @@ const ModuleDetail: React.FC<ModuleDetailProps> = ({
     showSuccess('Tarea personalizada añadida.');
   };
 
-  const handleDeleteTask = useCallback(
-    (taskId: string) => {
-      if (
-        window.confirm(
-          '¿Estás seguro de que quieres eliminar esta ficha? Esta acción no se puede deshacer.',
-        )
-      ) {
-        onDeleteTask(moduleId, taskId);
-        showSuccess('Ficha eliminada.');
-      }
-    },
-    [moduleId, onDeleteTask, showSuccess],
-  );
+  const handleDeleteTask = (taskId: string) => {
+    setTaskToDelete(taskId);
+  };
+
+  const confirmDeleteTask = useCallback(() => {
+    if (!taskToDelete) return;
+    onDeleteTask(moduleId, taskToDelete);
+    successAction(t('feedback.actions.delete_task_card'));
+    setTaskToDelete(null);
+  }, [moduleId, onDeleteTask, taskToDelete, successAction, t]);
 
   const handleToggleExpand = useCallback((taskId: string) => {
     setExpandedTask((prev) => (prev === taskId ? null : taskId));
@@ -275,6 +276,15 @@ const ModuleDetail: React.FC<ModuleDetailProps> = ({
     <div
       className={`max-w-4xl mx-auto space-y-8 animate-fade-in pb-20 ${zenMode ? 'fixed inset-0 z-50 bg-white dark:bg-slate-900 p-8 overflow-auto max-w-none' : ''}`}
     >
+      <ConfirmDialog
+        isOpen={!!taskToDelete}
+        title={t('feedback.confirm.delete_task_title')}
+        message={t('feedback.confirm.delete_task_message')}
+        confirmLabel={t('feedback.confirm.confirm_button')}
+        cancelLabel={t('feedback.confirm.cancel_button')}
+        onConfirm={confirmDeleteTask}
+        onCancel={() => setTaskToDelete(null)}
+      />
       {/* Header */}
       {!zenMode && (
         <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-slate-100 dark:border-slate-700 shadow-sm relative overflow-hidden">
