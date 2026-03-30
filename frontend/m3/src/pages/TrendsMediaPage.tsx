@@ -78,7 +78,7 @@ const TrendsMediaPage: React.FC = () => {
               Trends media integrado
             </div>
             <h1 className="text-3xl font-bold tracking-tight">{headline}</h1>
-            <p className="mt-3 max-w-2xl text-sm text-slate-200 md:text-base">El antiguo <code>frontend/trends-media-app</code> ahora vive dentro de MediaFlow SEO para arrancar con el mismo frontend principal y compartir despliegue, navegación y dependencias.</p>
+            <p className="mt-3 max-w-2xl text-sm text-slate-200 md:text-base">El antiguo standalone <code>Tendencias-medios-main/Tendencias-medios-main</code> fue consolidado en este módulo canónico para compartir frontend, despliegue y dependencias sin código duplicado.</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
