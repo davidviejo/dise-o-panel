@@ -289,7 +289,7 @@ export const SeoUrlList: React.FC<Props> = ({
       await runBatchWithConcurrency(
         pagesToAnalyze,
         async (page) => {
-          const update = await runPageAnalysis(page, analysisConfig);
+          const update = await runPageAnalysis(page, analysisConfig, settings);
           onBulkUpdate([{ id: page.id, changes: update }]);
           return update;
         },
