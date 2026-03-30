@@ -115,7 +115,9 @@ export const SeoUrlList: React.FC<Props> = ({
       'Cluster',
       ...CHECKLIST_POINTS.map((p) => p.label),
     ];
-    const summaryData = pages.map((p) => [
+    const exportPages = filteredPages;
+
+    const summaryData = exportPages.map((p) => [
       p.url,
       p.kwPrincipal,
       p.pageType,
@@ -133,7 +135,7 @@ export const SeoUrlList: React.FC<Props> = ({
       detailHeaders.push(`${p.label} - Auto`);
     });
 
-    const detailData = pages.map((p) => {
+    const detailData = exportPages.map((p) => {
       const row = [p.url, p.kwPrincipal, p.pageType, p.cluster || ''];
       CHECKLIST_POINTS.forEach((point) => {
         const item = p.checklist[point.key];
@@ -170,7 +172,7 @@ export const SeoUrlList: React.FC<Props> = ({
 
     const clusterRows: any[][] = [];
 
-    pages.forEach((p) => {
+    exportPages.forEach((p) => {
       const item = p.checklist.OPORTUNIDADES;
       if (item?.autoData?.clusters && Array.isArray(item.autoData.clusters)) {
         const { summary, clusters } = item.autoData;
