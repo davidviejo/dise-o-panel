@@ -1,6 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useProject } from '../context/ProjectContext';
 import { SeoPage, ChecklistKey, ChecklistItem } from '../types/seoChecklist';
+import { isBrandTermMatch } from '../utils/brandTerms';
+import { useSeoChecklistSettings } from './useSeoChecklistSettings';
 
 const normalizeKeyword = (keyword?: string) => (keyword || '').trim().toLowerCase();
 const isUsableKeyword = (keyword?: string) => {
@@ -47,13 +49,16 @@ const shouldKeepKeywordOver = (candidate: SeoPage, currentWinner: SeoPage) => {
   return candidate.id < currentWinner.id;
 };
 
-export const enforceUniquePrimaryKeywords = (pages: SeoPage[]) => {
+export const enforceUniquePrimaryKeywords = (pages: SeoPage[], brandTerms: string[] = []) => {
   const winners = new Map<string, string>();
 
   pages.forEach((page) => {
-    if (page.isBrandKeyword) return;
-
     const keywordCandidate = getKeywordCandidate(page);
+    const isBrandKeywordCandidate = isBrandTermMatch(keywordCandidate, brandTerms);
+    const isBrandPage = Boolean(page.isBrandKeyword || isBrandKeywordCandidate);
+
+    if (isBrandPage) return;
+
     const normalizedKeyword = normalizeKeyword(keywordCandidate);
     if (!isUsableKeyword(keywordCandidate)) return;
 
@@ -71,10 +76,21 @@ export const enforceUniquePrimaryKeywords = (pages: SeoPage[]) => {
 
   return pages.map((page) => {
     const keywordCandidate = getKeywordCandidate(page);
+    const isBrandKeywordCandidate = isBrandTermMatch(keywordCandidate, brandTerms);
+    const isBrandPage = Boolean(page.isBrandKeyword || isBrandKeywordCandidate);
     const normalizedKeyword = normalizeKeyword(keywordCandidate);
     const nextOriginalKeyword = isUsableKeyword(keywordCandidate) ? keywordCandidate : undefined;
 
-    if (page.isBrandKeyword || !isUsableKeyword(keywordCandidate)) {
+    if (isBrandPage) {
+      return {
+        ...page,
+        kwPrincipal: '',
+        originalKwPrincipal: nextOriginalKeyword,
+        isBrandKeyword: true,
+      };
+    }
+
+    if (!isUsableKeyword(keywordCandidate)) {
       return {
         ...page,
         originalKwPrincipal: nextOriginalKeyword,
@@ -99,6 +115,8 @@ export const enforceUniquePrimaryKeywords = (pages: SeoPage[]) => {
 
 export const useSeoChecklist = () => {
   const { currentClientId } = useProject();
+  const { settings } = useSeoChecklistSettings();
+  const activeBrandTerms = useMemo(() => settings.brandTerms || [], [settings.brandTerms]);
   const storageKey = `mediaflow_seo_checklist_${currentClientId}`;
   const [pages, setPages] = useState<SeoPage[]>(() => {
     if (!currentClientId) return [];
@@ -114,12 +132,12 @@ export const useSeoChecklist = () => {
   const addPages = useCallback(
     (newPages: SeoPage[]) => {
       setPages((prev) => {
-        const updated = enforceUniquePrimaryKeywords([...prev, ...newPages]);
+        const updated = enforceUniquePrimaryKeywords([...prev, ...newPages], activeBrandTerms);
         localStorage.setItem(storageKey, JSON.stringify(updated));
         return updated;
       });
     },
-    [storageKey],
+    [activeBrandTerms, storageKey],
   );
 
   const updatePage = useCallback(
@@ -127,12 +145,13 @@ export const useSeoChecklist = () => {
       setPages((prev) => {
         const updated = enforceUniquePrimaryKeywords(
           prev.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+          activeBrandTerms,
         );
         localStorage.setItem(storageKey, JSON.stringify(updated));
         return updated;
       });
     },
-    [storageKey],
+    [activeBrandTerms, storageKey],
   );
 
   const bulkUpdatePages = useCallback(
@@ -143,12 +162,13 @@ export const useSeoChecklist = () => {
             const update = updates.find((u) => u.id === p.id);
             return update ? { ...p, ...update.changes } : p;
           }),
+          activeBrandTerms,
         );
         localStorage.setItem(storageKey, JSON.stringify(updated));
         return updated;
       });
     },
-    [storageKey],
+    [activeBrandTerms, storageKey],
   );
 
   const updateChecklistItem = useCallback(

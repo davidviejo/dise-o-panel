@@ -78,6 +78,57 @@ describe('enforceUniquePrimaryKeywords', () => {
 
     expect(result.find((page) => page.id === 'page-a')?.kwPrincipal).toBe('kw compartida');
     expect(result.find((page) => page.id === 'page-a')?.originalKwPrincipal).toBe('kw compartida');
-    expect(result.find((page) => page.id === 'page-b')?.kwPrincipal).toBe('kw compartida');
+    expect(result.find((page) => page.id === 'page-b')?.kwPrincipal).toBe('');
+  });
+
+  it('never assigns as primary a keyword that matches a brand term', () => {
+    const pages = [
+      buildPage({
+        id: 'page-brand',
+        url: 'https://example.com/brand',
+        kwPrincipal: 'comprar zapatillas nike',
+        gscMetrics: { clicks: 80, impressions: 500, ctr: 0.16, position: 2 },
+      }),
+      buildPage({
+        id: 'page-generic',
+        url: 'https://example.com/generic',
+        kwPrincipal: 'comprar zapatillas nike',
+        gscMetrics: { clicks: 30, impressions: 300, ctr: 0.1, position: 4 },
+      }),
+    ];
+
+    const result = enforceUniquePrimaryKeywords(pages, ['nike']);
+
+    expect(result.find((page) => page.id === 'page-brand')?.kwPrincipal).toBe('');
+    expect(result.find((page) => page.id === 'page-brand')?.originalKwPrincipal).toBe(
+      'comprar zapatillas nike',
+    );
+    expect(result.find((page) => page.id === 'page-brand')?.isBrandKeyword).toBe(true);
+    expect(result.find((page) => page.id === 'page-generic')?.kwPrincipal).toBe('');
+  });
+
+  it('falls back correctly to another non-brand URL with duplicated keyword', () => {
+    const pages = [
+      buildPage({
+        id: 'page-brand',
+        url: 'https://example.com/brand',
+        kwPrincipal: 'kw compartida',
+        isBrandKeyword: true,
+        gscMetrics: { clicks: 120, impressions: 900, ctr: 0.13, position: 1.9 },
+      }),
+      buildPage({
+        id: 'page-non-brand',
+        url: 'https://example.com/non-brand',
+        kwPrincipal: '',
+        originalKwPrincipal: 'kw compartida',
+        gscMetrics: { clicks: 20, impressions: 150, ctr: 0.13, position: 5 },
+      }),
+    ];
+
+    const result = enforceUniquePrimaryKeywords(pages, ['nike']);
+
+    expect(result.find((page) => page.id === 'page-brand')?.kwPrincipal).toBe('');
+    expect(result.find((page) => page.id === 'page-brand')?.isBrandKeyword).toBe(true);
+    expect(result.find((page) => page.id === 'page-non-brand')?.kwPrincipal).toBe('kw compartida');
   });
 });
