@@ -117,7 +117,7 @@ export const SeoChecklistDetail: React.FC<Props> = ({
           confirmed: settings.serp.enabled,
         },
         budgets: settings.budgets,
-      });
+      }, settings);
       onUpdatePage(page.id, updates);
     } catch (err: any) {
       setError(err.message || 'Error de conexión con el motor de análisis.');

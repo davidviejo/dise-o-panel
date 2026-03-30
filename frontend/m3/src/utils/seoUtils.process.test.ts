@@ -1,8 +1,23 @@
-import { describe, it, expect } from 'vitest';
-import { processAnalysisResult } from './seoUtils';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { processAnalysisResult, runPageAnalysis } from './seoUtils';
 import { SeoPage, ChecklistItem } from '../types/seoChecklist';
+import { analyzeUrl } from '../services/pythonEngineClient';
+
+vi.mock('../services/pythonEngineClient', () => ({
+  analyzeUrl: vi.fn(),
+}));
+
+vi.mock('../services/googleSearchConsole', () => ({
+  getPageMetrics: vi.fn(),
+  getPageQueries: vi.fn(),
+}));
 
 describe('processAnalysisResult', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    localStorage.clear();
+  });
+
   const mockPage: SeoPage = {
     id: 'page-1',
     url: 'https://example.com',
@@ -78,15 +93,12 @@ describe('processAnalysisResult', () => {
       },
     ];
 
-    localStorage.setItem(
-      'mediaflow_seo_settings_test',
-      JSON.stringify({ brandTerms: ['brand kw'] }),
-    );
-
     const updates = processAnalysisResult(
       pageWithoutKeyword,
       { pageId: 'page-1', items: {} },
       gscQueries,
+      undefined,
+      ['brand kw'],
     );
 
     expect(updates.kwPrincipal).toBe('seo checklist');
@@ -110,15 +122,12 @@ describe('processAnalysisResult', () => {
       },
     ];
 
-    localStorage.setItem(
-      'mediaflow_seo_settings_test',
-      JSON.stringify({ brandTerms: ['brand kw'] }),
-    );
-
     const updates = processAnalysisResult(
       pageWithoutKeyword,
       { pageId: 'page-1', items: {} },
       gscQueries,
+      undefined,
+      ['brand kw'],
     );
 
     expect(updates.kwPrincipal).toBe('');
@@ -150,15 +159,12 @@ describe('processAnalysisResult', () => {
       },
     ];
 
-    localStorage.setItem(
-      'mediaflow_seo_settings_test',
-      JSON.stringify({ brandTerms: ['zara'] }),
-    );
-
     const updates = processAnalysisResult(
       pageWithoutKeyword,
       { pageId: 'page-1', items: {} },
       gscQueries,
+      undefined,
+      ['zara'],
     );
 
     expect(updates.kwPrincipal).toBe('vestidos fiesta');
@@ -178,17 +184,17 @@ describe('processAnalysisResult', () => {
       },
     ];
 
-    localStorage.setItem(
-      'mediaflow_seo_settings_test',
-      JSON.stringify({ allowKwPrincipalUpdate: false, brandTerms: [] }),
+    const updates = processAnalysisResult(
+      mockPage,
+      { pageId: 'page-1', items: {} },
+      gscQueries,
+      undefined,
+      [],
+      false,
     );
-
-    const updates = processAnalysisResult(mockPage, { pageId: 'page-1', items: {} }, gscQueries);
 
     expect(updates.kwPrincipal).toBe('test');
     expect(updates.checklist?.OPORTUNIDADES.autoData.primaryKeyword).toBe('test');
-
-    localStorage.removeItem('mediaflow_seo_settings_test');
   });
 
   it('should inject GSC queries if provided', () => {
@@ -308,5 +314,31 @@ describe('processAnalysisResult', () => {
 
     const updates = processAnalysisResult(mockPage, result);
     expect(updates.checklist?.GEOLOCALIZACION?.autoData?.localBusiness).toBeUndefined();
+  });
+
+  it('should use only active project settings when multiple seo settings keys exist', async () => {
+    localStorage.setItem('mediaflow_current_client_id', 'project-b');
+    localStorage.setItem(
+      'mediaflow_seo_settings_project-a',
+      JSON.stringify({ brandTerms: ['projecta'], allowKwPrincipalUpdate: true }),
+    );
+    localStorage.setItem(
+      'mediaflow_seo_settings_project-b',
+      JSON.stringify({ brandTerms: [], allowKwPrincipalUpdate: false }),
+    );
+
+    (analyzeUrl as any).mockResolvedValue({
+      pageId: 'page-1',
+      items: {},
+    });
+
+    const updates = await runPageAnalysis(
+      { ...mockPage, kwPrincipal: '' },
+      undefined,
+      undefined,
+    );
+
+    expect(updates.kwPrincipal).toBe('');
+    expect(updates.checklist?.OPORTUNIDADES.autoData.primaryKeyword).toBe('');
   });
 });

@@ -1,8 +1,14 @@
-import { SeoPage, ChecklistKey, AnalysisConfigPayload } from '../types/seoChecklist';
+import {
+  SeoPage,
+  ChecklistKey,
+  AnalysisConfigPayload,
+  SeoChecklistSettings,
+} from '../types/seoChecklist';
 import { analyzeUrl, AnalysisResponse } from '../services/pythonEngineClient';
 import { getPageMetrics, getPageQueries } from '../services/googleSearchConsole';
 import { normalizeSeoPageInput } from './seoUrlNormalizer';
 import { isBrandTermMatch } from './brandTerms';
+import { ClientRepository } from '../services/clientRepository';
 
 const normalizeGscQueryRow = (row: any) => {
   const query = row?.query || row?.keys?.[0] || '';
@@ -13,29 +19,19 @@ const normalizeGscQueryRow = (row: any) => {
   };
 };
 
-const getStoredSeoChecklistSettings = () => {
-  const settingsKey = Object.keys(localStorage).find((key) =>
-    key.startsWith('mediaflow_seo_settings_'),
-  );
-  if (!settingsKey) return null;
-
+const getStoredSeoChecklistSettings = (): SeoChecklistSettings | null => {
+  const currentClientId = ClientRepository.getCurrentClientId();
+  if (!currentClientId) return null;
+  const settingsKey = `mediaflow_seo_settings_${currentClientId}`;
   try {
     const raw = localStorage.getItem(settingsKey);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed as SeoChecklistSettings;
   } catch (error) {
     console.warn('Could not parse SEO checklist settings', error);
     return null;
   }
-};
-
-const getStoredBrandTerms = (): string[] => {
-  const parsed = getStoredSeoChecklistSettings();
-  return Array.isArray(parsed?.brandTerms) ? parsed.brandTerms : [];
-};
-
-const shouldAllowKwPrincipalUpdate = () => {
-  const parsed = getStoredSeoChecklistSettings();
-  return parsed?.allowKwPrincipalUpdate !== false;
 };
 
 const isUsablePrimaryKeyword = (keyword?: string) => {
@@ -61,16 +57,10 @@ const pickPrimaryKeywordFromQueries = (gscQueries: any[] = [], brandTerms: strin
   return sortedQueries[0]?.query?.trim() || '';
 };
 
-const buildDefaultAnalysisConfig = (): AnalysisConfigPayload => {
-  const raw = localStorage.getItem(
-    Object.keys(localStorage).find((key) => key.startsWith('mediaflow_seo_settings_')) || '',
-  );
-  let parsed = null;
-  try {
-    parsed = raw ? JSON.parse(raw) : null;
-  } catch (error) {
-    console.warn('Could not parse SEO checklist settings', error);
-  }
+const buildDefaultAnalysisConfig = (
+  settings?: SeoChecklistSettings | null,
+): AnalysisConfigPayload => {
+  const parsed = settings || getStoredSeoChecklistSettings();
 
   const serp = parsed?.serp || {};
   const budgets = parsed?.budgets || {};
@@ -122,6 +112,8 @@ export const processAnalysisResult = (
   result: AnalysisResponse,
   gscQueries: any[] = [],
   gscMetrics?: SeoPage['gscMetrics'],
+  brandTerms: string[] = [],
+  allowKwPrincipalUpdate = true,
 ): Partial<SeoPage> => {
   // FIX: Sync LocalBusiness from DATOS_ESTRUCTURADOS to GEOLOCALIZACION
   // If structured data sees LocalBusiness, GEOLOCALIZACION should also reflect it.
@@ -161,8 +153,6 @@ export const processAnalysisResult = (
   // We'll follow the original logic: ensure the structure exists, then inject/overwrite if gscQueries is not empty.
 
   const normalizedGscQueries = gscQueries.map(normalizeGscQueryRow);
-  const brandTerms = getStoredBrandTerms();
-  const allowKwPrincipalUpdate = shouldAllowKwPrincipalUpdate();
   const currentPrimaryKeyword =
     isUsablePrimaryKeyword(page.kwPrincipal) && !isBrandTermMatch(page.kwPrincipal, brandTerms)
       ? page.kwPrincipal.trim()
@@ -263,9 +253,15 @@ export const processAnalysisResult = (
 export const runPageAnalysis = async (
   page: SeoPage,
   analysisConfig?: AnalysisConfigPayload,
+  projectSettings?: SeoChecklistSettings | null,
 ): Promise<Partial<SeoPage>> => {
   const normalizedPage = normalizeSeoPageInput(page);
-  const resolvedAnalysisConfig = analysisConfig || buildDefaultAnalysisConfig();
+  const resolvedProjectSettings = projectSettings || getStoredSeoChecklistSettings();
+  const resolvedAnalysisConfig = analysisConfig || buildDefaultAnalysisConfig(resolvedProjectSettings);
+  const resolvedBrandTerms = Array.isArray(resolvedProjectSettings?.brandTerms)
+    ? resolvedProjectSettings.brandTerms
+    : [];
+  const resolvedAllowKwPrincipalUpdate = resolvedProjectSettings?.allowKwPrincipalUpdate !== false;
   let gscQueries: any[] = [];
   let gscMetrics: SeoPage['gscMetrics'] | undefined = page.gscMetrics;
 
@@ -320,7 +316,14 @@ export const runPageAnalysis = async (
     analysisConfig: resolvedAnalysisConfig,
   });
 
-  const updates = processAnalysisResult(normalizedPage, result, gscQueries, gscMetrics);
+  const updates = processAnalysisResult(
+    normalizedPage,
+    result,
+    gscQueries,
+    gscMetrics,
+    resolvedBrandTerms,
+    resolvedAllowKwPrincipalUpdate,
+  );
   updates.url = normalizedPage.url;
   return updates;
 };
