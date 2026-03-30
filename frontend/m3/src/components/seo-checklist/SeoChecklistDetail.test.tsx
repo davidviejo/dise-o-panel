@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SeoChecklistDetail } from './SeoChecklistDetail';
 import { SeoPage, ChecklistItem } from '../../types/seoChecklist';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
@@ -28,25 +28,27 @@ vi.mock('./ChecklistItem', () => ({
 }));
 
 
+const mockSettings = {
+  serp: {
+    enabled: false,
+    provider: 'dataforseo',
+    maxKeywordsPerUrl: 10,
+    maxCompetitorsPerKeyword: 3,
+    dataforseoLogin: '',
+    dataforseoPassword: '',
+  },
+  budgets: {
+    maxUrlsPerBatch: 50,
+    dailyBudget: 10,
+    maxEstimatedCostPerBatch: 5,
+  },
+  competitorsMode: 'autoFromSerp' as const,
+  brandTerms: [] as string[],
+};
+
 vi.mock('../../hooks/useSeoChecklistSettings', () => ({
   useSeoChecklistSettings: () => ({
-    settings: {
-      serp: {
-        enabled: false,
-        provider: 'dataforseo',
-        maxKeywordsPerUrl: 10,
-        maxCompetitorsPerKeyword: 3,
-        dataforseoLogin: '',
-        dataforseoPassword: '',
-      },
-      budgets: {
-        maxUrlsPerBatch: 50,
-        dailyBudget: 10,
-        maxEstimatedCostPerBatch: 5,
-      },
-      competitorsMode: 'autoFromSerp',
-      brandTerms: [],
-    },
+    settings: mockSettings,
   }),
 }));
 
@@ -85,6 +87,40 @@ CHECKLIST_POINTS.forEach((point) => {
 });
 
 describe('SeoChecklistDetail', () => {
+  beforeEach(() => {
+    mockSettings.brandTerms = [];
+  });
+
+  it('guarda como keyword de marca y sin kwPrincipal cuando la keyword incluye marca', () => {
+    const onUpdatePage = vi.fn();
+    mockSettings.brandTerms = ['acme'];
+
+    render(
+      <SeoChecklistDetail
+        page={mockPage}
+        onUpdatePage={onUpdatePage}
+        onUpdateChecklistItem={vi.fn()}
+        onBack={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByTitle('Editar detalles'));
+    fireEvent.change(screen.getByDisplayValue('test keyword'), {
+      target: { value: 'mejor producto ACME 2026' },
+    });
+    fireEvent.click(screen.getByTitle('Guardar cambios'));
+
+    expect(onUpdatePage).toHaveBeenCalledWith('page-1', {
+      url: 'https://example.com/test',
+      kwPrincipal: '',
+      isBrandKeyword: true,
+      pageType: 'Article',
+      cluster: 'Test Cluster',
+      competitors: [],
+    });
+
+  });
+
   it('renders correctly in view mode', () => {
     render(
       <SeoChecklistDetail
