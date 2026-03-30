@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useProject } from '../context/ProjectContext';
-import { SeoPage, ChecklistKey, ChecklistItem } from '../types/seoChecklist';
+import { SeoPage, ChecklistKey, ChecklistItem, CHECKLIST_POINTS } from '../types/seoChecklist';
 import { isBrandTermMatch } from '../utils/brandTerms';
 import { useSeoChecklistSettings } from './useSeoChecklistSettings';
 
@@ -48,6 +48,36 @@ const shouldKeepKeywordOver = (candidate: SeoPage, currentWinner: SeoPage) => {
 
   return candidate.id < currentWinner.id;
 };
+
+const buildFallbackChecklistItem = (key: ChecklistKey): ChecklistItem => {
+  const point = CHECKLIST_POINTS.find((item) => item.key === key);
+  return {
+    key,
+    label: point?.label || key,
+    status_manual: 'NA',
+    notes_manual: '',
+  };
+};
+
+const normalizeChecklist = (checklist?: Partial<Record<ChecklistKey, ChecklistItem>>) => {
+  return CHECKLIST_POINTS.reduce(
+    (acc, point) => {
+      const existing = checklist?.[point.key];
+      acc[point.key] = existing
+        ? { ...buildFallbackChecklistItem(point.key), ...existing }
+        : buildFallbackChecklistItem(point.key);
+      return acc;
+    },
+    {} as Record<ChecklistKey, ChecklistItem>,
+  );
+};
+
+const normalizeSeoPage = (page: SeoPage): SeoPage => ({
+  ...page,
+  checklist: normalizeChecklist(page.checklist),
+});
+
+const normalizeSeoPages = (pages: SeoPage[]) => pages.map(normalizeSeoPage);
 
 export const enforceUniquePrimaryKeywords = (pages: SeoPage[], brandTerms: string[] = []) => {
   const winners = new Map<string, string>();
@@ -122,7 +152,15 @@ export const useSeoChecklist = () => {
     if (!currentClientId) return [];
     try {
       const saved = localStorage.getItem(storageKey);
-      return saved ? JSON.parse(saved) : [];
+      if (!saved) return [];
+
+      const parsed = JSON.parse(saved) as SeoPage[];
+      const normalized = normalizeSeoPages(parsed);
+      if (JSON.stringify(parsed) !== JSON.stringify(normalized)) {
+        localStorage.setItem(storageKey, JSON.stringify(normalized));
+      }
+
+      return normalized;
     } catch (e) {
       console.error('Failed to parse SEO Checklist data', e);
       return [];
@@ -132,7 +170,10 @@ export const useSeoChecklist = () => {
   const addPages = useCallback(
     (newPages: SeoPage[]) => {
       setPages((prev) => {
-        const updated = enforceUniquePrimaryKeywords([...prev, ...newPages], activeBrandTerms);
+        const updated = enforceUniquePrimaryKeywords(
+          normalizeSeoPages([...prev, ...newPages]),
+          activeBrandTerms,
+        );
         localStorage.setItem(storageKey, JSON.stringify(updated));
         return updated;
       });
@@ -144,7 +185,7 @@ export const useSeoChecklist = () => {
     (id: string, updates: Partial<SeoPage>) => {
       setPages((prev) => {
         const updated = enforceUniquePrimaryKeywords(
-          prev.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+          normalizeSeoPages(prev.map((p) => (p.id === id ? { ...p, ...updates } : p))),
           activeBrandTerms,
         );
         localStorage.setItem(storageKey, JSON.stringify(updated));
@@ -158,10 +199,12 @@ export const useSeoChecklist = () => {
     (updates: { id: string; changes: Partial<SeoPage> }[]) => {
       setPages((prev) => {
         const updated = enforceUniquePrimaryKeywords(
-          prev.map((p) => {
-            const update = updates.find((u) => u.id === p.id);
-            return update ? { ...p, ...update.changes } : p;
-          }),
+          normalizeSeoPages(
+            prev.map((p) => {
+              const update = updates.find((u) => u.id === p.id);
+              return update ? { ...p, ...update.changes } : p;
+            }),
+          ),
           activeBrandTerms,
         );
         localStorage.setItem(storageKey, JSON.stringify(updated));
@@ -181,7 +224,7 @@ export const useSeoChecklist = () => {
             ...p,
             checklist: {
               ...p.checklist,
-              [key]: { ...currentItem, ...updates },
+              [key]: { ...(currentItem || buildFallbackChecklistItem(key)), ...updates },
             },
           };
         });
