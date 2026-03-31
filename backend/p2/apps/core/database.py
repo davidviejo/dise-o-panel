@@ -739,29 +739,30 @@ def get_job(job_id: str) -> Optional[Dict[str, Any]]:
     finally:
         conn.close()
 
-def get_job_items(job_id: str, status: str = None, page: int = 1, page_size: int = 50) -> Dict[str, Any]:
-    """Retrieves job items with pagination."""
+def get_job_items(job_id: str, status: Optional[List[str]] = None, page: int = 1, page_size: int = 50) -> Dict[str, Any]:
+    """Retrieves job items with pagination and optional multi-status filtering."""
     conn = get_db_connection()
     try:
         c = conn.cursor()
         offset = (page - 1) * page_size
 
-        query = "SELECT item_id, url, status, finished_at, error_message, item_metadata FROM analysis_job_items WHERE job_id = ?"
-        params = [job_id]
+        base_query = "SELECT item_id, url, status, finished_at, error_message, item_metadata FROM analysis_job_items WHERE job_id = ?"
+        params: List[Any] = [job_id]
 
-        if status:
-            query += " AND status = ?"
-            params.append(status)
+        statuses = [entry for entry in (status or []) if entry]
+        if statuses:
+            placeholders = ', '.join(['?'] * len(statuses))
+            base_query += f" AND status IN ({placeholders})"
+            params.extend(statuses)
 
-        # Count total for pagination
-        count_query = query.replace("item_id, url, status, finished_at, error_message, item_metadata", "COUNT(*)")
+        count_query = f"SELECT COUNT(*) FROM ({base_query}) AS filtered_items"
         c.execute(count_query, params)
         total_items = c.fetchone()[0]
 
-        query += " LIMIT ? OFFSET ?"
-        params.extend([page_size, offset])
+        query = f"{base_query} LIMIT ? OFFSET ?"
+        query_params = [*params, page_size, offset]
 
-        c.execute(query, params)
+        c.execute(query, query_params)
         items = [dict(row) for row in c.fetchall()]
 
         return {

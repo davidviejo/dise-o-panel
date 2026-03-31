@@ -222,28 +222,19 @@ export const getBatchJobItems = async (
   page: number = 1,
   limit: number = 50,
 ): Promise<{ items: BatchJobItem[]; total: number }> => {
-  const statuses = status
-    ?.split(',')
-    .map((entry) => entry.trim())
-    .filter(Boolean);
-
-  if (statuses && statuses.length > 1) {
-    const responses = await Promise.all(
-      statuses.map((singleStatus) => getBatchJobItems(jobId, singleStatus, page, limit)),
-    );
-
-    const merged = responses.flatMap((response) => response.items).slice(0, limit);
-    const total = responses.reduce((sum, response) => sum + response.total, 0);
-
-    return { items: merged, total };
-  }
-
   const params = new URLSearchParams({
     page: page.toString(),
     pageSize: limit.toString(),
   });
-  if (status) {
-    params.append('status', status);
+
+  const normalizedStatus = status
+    ?.split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .join(',');
+
+  if (normalizedStatus) {
+    params.append('status', normalizedStatus);
   }
 
   let data: RawBatchJobItemsResponse;
@@ -252,6 +243,7 @@ export const getBatchJobItems = async (
   } catch (error) {
     throw buildError(error, 'Failed to get job items');
   }
+
   return {
     items: (data.items || []).map(normalizeBatchJobItem),
     total: data.total || 0,

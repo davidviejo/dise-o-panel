@@ -140,10 +140,15 @@ def get_job_status(job_id):
 @api_engine_bp.route('/api/jobs/<job_id>/items', methods=['GET'])
 def get_job_items_route(job_id):
     status = request.args.get('status')
+    status_filters = None
+
+    if status:
+        status_filters = [entry.strip() for entry in status.split(',') if entry.strip()]
+
     page = int(request.args.get('page', 1))
     page_size = int(request.args.get('pageSize', 50))
 
-    result = get_job_items(job_id, status, page, page_size)
+    result = get_job_items(job_id, status_filters, page, page_size)
     return jsonify(result)
 
 @api_engine_bp.route('/api/jobs/<job_id>/items/<item_id>/result', methods=['GET'])
