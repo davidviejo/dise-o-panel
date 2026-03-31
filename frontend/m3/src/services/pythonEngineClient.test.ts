@@ -97,4 +97,64 @@ describe('pythonEngineClient', () => {
       total: 1,
     });
   });
+
+  it('supports comma-separated statuses when fetching batch items', async () => {
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          items: [{ item_id: 'item-queued', status: 'queued', url: 'https://example.com/queued' }],
+          total: 1,
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          items: [{ item_id: 'item-running', status: 'running', url: 'https://example.com/running' }],
+          total: 2,
+        }),
+      });
+
+    const response = await getBatchJobItems('job-2', 'queued,running', 1, 50);
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining(
+        endpoints.engine.jobItems(
+          'job-2',
+          new URLSearchParams({ page: '1', pageSize: '50', status: 'queued' }),
+        ),
+      ),
+      expect.objectContaining({ method: 'GET' }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining(
+        endpoints.engine.jobItems(
+          'job-2',
+          new URLSearchParams({ page: '1', pageSize: '50', status: 'running' }),
+        ),
+      ),
+      expect.objectContaining({ method: 'GET' }),
+    );
+    expect(response).toEqual({
+      items: [
+        {
+          itemId: 'item-queued',
+          status: 'pending',
+          url: 'https://example.com/queued',
+          error: undefined,
+          updated_at: undefined,
+        },
+        {
+          itemId: 'item-running',
+          status: 'processing',
+          url: 'https://example.com/running',
+          error: undefined,
+          updated_at: undefined,
+        },
+      ],
+      total: 3,
+    });
+  });
 });

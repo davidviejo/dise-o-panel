@@ -222,17 +222,20 @@ export const getBatchJobItems = async (
   page: number = 1,
   limit: number = 50,
 ): Promise<{ items: BatchJobItem[]; total: number }> => {
-  if (status === 'pending,processing') {
-    const [pending, processing] = await Promise.all([
-      getBatchJobItems(jobId, 'pending', page, limit),
-      getBatchJobItems(jobId, 'running', page, limit),
-    ]);
+  const statuses = status
+    ?.split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
 
-    const merged = [...pending.items, ...processing.items].slice(0, limit);
-    return {
-      items: merged,
-      total: pending.total + processing.total,
-    };
+  if (statuses && statuses.length > 1) {
+    const responses = await Promise.all(
+      statuses.map((singleStatus) => getBatchJobItems(jobId, singleStatus, page, limit)),
+    );
+
+    const merged = responses.flatMap((response) => response.items).slice(0, limit);
+    const total = responses.reduce((sum, response) => sum + response.total, 0);
+
+    return { items: merged, total };
   }
 
   const params = new URLSearchParams({
