@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Layout from './components/Layout';
+import InternalAppShell from './components/InternalAppShell';
 import { ToastProvider } from './components/ui/ToastContext';
 import { ProjectProvider, useProject } from './context/ProjectContext';
 import { SettingsProvider } from './context/SettingsContext';
@@ -45,7 +45,6 @@ export const AppRoutes: React.FC = () => {
     clients,
     currentClientId,
     currentClient,
-    generalNotes,
     switchClient,
     addClient,
     deleteClient,
@@ -60,9 +59,6 @@ export const AppRoutes: React.FC = () => {
     handleReorderRoadmap,
     addManualCompletedTask,
     deleteCompletedTaskLog,
-    addNote,
-    updateNote,
-    deleteNote,
   } = useProject();
 
   return (
@@ -74,29 +70,20 @@ export const AppRoutes: React.FC = () => {
       }
     >
       <Routes>
-        {/* 1) Rutas públicas */}
         {publicRoutes}
 
-        {/* 2) Operador */}
         {operatorRoutes}
 
-        {/* 3) Rutas internas */}
         <Route
           path="/app/*"
           element={
-            <Layout
+            <InternalAppShell
               modules={modules}
-              globalScore={globalScore}
               clients={clients}
               currentClientId={currentClientId}
               onSwitchClient={switchClient}
               onAddClient={addClient}
               onDeleteClient={deleteClient}
-              generalNotes={generalNotes}
-              projectNotes={currentClient?.notes || []}
-              onAddNote={addNote}
-              onUpdateNote={updateNote}
-              onDeleteNote={deleteNote}
             >
               <Routes>
                 <Route
@@ -167,7 +154,7 @@ export const AppRoutes: React.FC = () => {
                 />
                 <Route path="*" element={<Navigate to="/app" replace />} />
               </Routes>
-            </Layout>
+            </InternalAppShell>
           }
         />
 
