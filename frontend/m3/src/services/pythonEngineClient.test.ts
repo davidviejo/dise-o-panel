@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  analyzeUrl,
   getBatchJob,
   getBatchJobItems,
   updateBatchJob,
@@ -16,6 +17,19 @@ describe('pythonEngineClient', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     fetchMock.mockReset();
+  });
+
+  it('returns a clear timeout message when analysis exceeds the limit', async () => {
+    fetchMock.mockRejectedValueOnce(new DOMException('Aborted', 'AbortError'));
+
+    await expect(
+      analyzeUrl({
+        url: 'https://example.com',
+        kwPrincipal: 'keyword',
+        pageType: 'blog',
+        pageId: 'page-1',
+      }),
+    ).rejects.toThrow('El análisis superó el tiempo de espera. Intenta nuevamente.');
   });
 
   it('normalizes backend job payloads to the frontend shape', async () => {

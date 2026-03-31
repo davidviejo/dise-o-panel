@@ -5,6 +5,7 @@ import { analyzeUrl } from '../services/pythonEngineClient';
 
 vi.mock('../services/pythonEngineClient', () => ({
   analyzeUrl: vi.fn(),
+  ENGINE_ANALYZE_TIMEOUT_MS: 90000,
 }));
 
 vi.mock('../services/googleSearchConsole', () => ({

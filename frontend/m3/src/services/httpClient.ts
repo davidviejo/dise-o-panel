@@ -24,16 +24,22 @@ export interface HttpClientErrorPayload {
 export class HttpClientError extends Error {
   status?: number;
   payload?: HttpClientErrorPayload;
+  isTimeout?: boolean;
 
-  constructor(message: string, options: { status?: number; payload?: HttpClientErrorPayload } = {}) {
+  constructor(
+    message: string,
+    options: { status?: number; payload?: HttpClientErrorPayload; isTimeout?: boolean } = {},
+  ) {
     super(message);
     this.name = 'HttpClientError';
     this.status = options.status;
     this.payload = options.payload;
+    this.isTimeout = options.isTimeout;
   }
 }
 
 const DEFAULT_TIMEOUT_MS = 12000;
+const ENGINE_DEFAULT_TIMEOUT_MS = 90000;
 const DEFAULT_ERROR_MESSAGE = 'Request failed';
 
 const trimTrailingSlash = (value: string): string => value.replace(/\/+$/, '');
@@ -93,7 +99,8 @@ const resolveErrorMessage = (payload?: HttpClientErrorPayload): string => {
 export const createHttpClient = (config: HttpClientConfig = {}) => {
   const baseURL = normalizeBaseUrl(config);
   const includeAuth = config.includeAuth !== false;
-  const defaultTimeout = config.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const defaultTimeout =
+    config.timeoutMs ?? (config.service === 'engine' ? ENGINE_DEFAULT_TIMEOUT_MS : DEFAULT_TIMEOUT_MS);
 
   const request = async <T>(path: string, requestConfig: HttpRequestConfig = {}): Promise<T> => {
     const controller = new AbortController();
@@ -146,7 +153,7 @@ export const createHttpClient = (config: HttpClientConfig = {}) => {
       }
 
       if (error instanceof DOMException && error.name === 'AbortError') {
-        throw new HttpClientError(`Request timeout after ${timeoutMs}ms`);
+        throw new HttpClientError(`Request timeout after ${timeoutMs}ms`, { isTimeout: true });
       }
 
       throw new HttpClientError((error as Error)?.message || DEFAULT_ERROR_MESSAGE);
