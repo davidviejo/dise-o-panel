@@ -156,7 +156,26 @@ def get_item_result_route(job_id, item_id):
     res = get_job_item_result(job_id, item_id)
     if res is None:
         return jsonify({'error': 'Result not available or item not found'}), 404
-    return jsonify(res)
+
+    # Keep passthrough for already-normalized responses while guaranteeing
+    # AnalysisResponse shape for newly processed items.
+    if isinstance(res, dict) and 'pageId' in res and 'items' in res:
+        return jsonify(res)
+
+    normalized = {
+        'pageId': (res or {}).get('pageId') if isinstance(res, dict) else None,
+        'items': (res or {}).get('items') if isinstance(res, dict) and isinstance(res.get('items'), dict) else (res if isinstance(res, dict) else {}),
+    }
+
+    if not normalized['pageId']:
+        normalized['pageId'] = item_id
+
+    if isinstance(res, dict):
+        for key in ('url', 'generatedAt', 'advancedBlockedReason', 'advancedExecuted', 'engineMeta'):
+            if key in res:
+                normalized[key] = res[key]
+
+    return jsonify(normalized)
 
 @api_engine_bp.route('/api/jobs/<job_id>/pause', methods=['POST'])
 def pause_job(job_id):
