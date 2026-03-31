@@ -54,7 +54,9 @@ class TestJobsIntegration(unittest.TestCase):
     @patch('apps.job_runner.run_orchestrated_checklist')
     def test_job_execution(self, mock_orchestrator, mock_start_worker):
         # Mock orchestrator response
-        mock_orchestrator.return_value = {"status": "GOOD", "summary": "Test result"}
+        mock_orchestrator.return_value = {
+            "OPORTUNIDADES": {"suggested_status": "SI", "recommendation": "OK"}
+        }
 
         # Create job
         payload = {
@@ -91,7 +93,10 @@ class TestJobsIntegration(unittest.TestCase):
         # Check result detail
         response = self.client.get(f'/api/jobs/{job_id}/items/{item_id}/result')
         data = response.get_json()
-        self.assertEqual(data['status'], 'GOOD')
+        self.assertIn('pageId', data)
+        self.assertIn('items', data)
+        self.assertEqual(data['pageId'], item_id)
+        self.assertIn('OPORTUNIDADES', data['items'])
 
     @patch('apps.job_runner.JobRunner.start_worker')
     def test_cost_guardrail(self, mock_start_worker):

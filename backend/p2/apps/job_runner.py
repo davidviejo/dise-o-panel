@@ -154,6 +154,7 @@ class JobRunner:
         item_id = item['item_id']
         url = item['url']
         page_id = item['page_id']
+        resolved_page_id = page_id or item_id or url
 
         try:
             update_item_status(item_id, 'running')
@@ -184,7 +185,25 @@ class JobRunner:
                 analysis_config=config
             )
 
-            update_item_status(item_id, 'done', result=result)
+            # Ensure frontend-compatible AnalysisResponse shape.
+            if isinstance(result, dict) and 'pageId' in result and 'items' in result:
+                wrapped_result = dict(result)
+                wrapped_result['pageId'] = wrapped_result.get('pageId') or resolved_page_id
+                wrapped_result.setdefault('url', url)
+            else:
+                wrapped_result = {
+                    'pageId': resolved_page_id,
+                    'items': result if isinstance(result, dict) else {},
+                    'url': url,
+                    'generatedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+                }
+
+                if isinstance(result, dict):
+                    for key in ('advancedBlockedReason', 'advancedExecuted', 'engineMeta'):
+                        if key in result:
+                            wrapped_result[key] = result[key]
+
+            update_item_status(item_id, 'done', result=wrapped_result)
             update_job_progress(item['job_id'], success_inc=1, processed_inc=1)
 
         except Exception as e:
