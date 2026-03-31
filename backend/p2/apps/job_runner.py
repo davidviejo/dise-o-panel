@@ -172,8 +172,13 @@ class JobRunner:
             geo = meta.get('geoTarget', '')
             cluster = meta.get('cluster', '')
 
-            # Get GSC queries for this URL
-            gsc_queries = gsc_queries_map.get(url, [])
+            # Get GSC queries for this URL.
+            # Precedence:
+            # 1) Item-level metadata (new format): item_metadata.gscQueries
+            # 2) Job-level map (legacy format): analysis_config.gscQueriesByUrl[url]
+            gsc_queries = meta.get('gscQueries')
+            if gsc_queries is None:
+                gsc_queries = gsc_queries_map.get(url, [])
 
             result = run_orchestrated_checklist(
                 url=url,

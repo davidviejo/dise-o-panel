@@ -176,3 +176,12 @@ curl -X POST http://127.0.0.1:5000/api/jobs/<job_id>/pause
 curl -X POST http://127.0.0.1:5000/api/jobs/<job_id>/resume
 curl -X POST http://127.0.0.1:5000/api/jobs/<job_id>/cancel
 ```
+
+### GSC queries precedence in batch jobs
+
+For each batch item, GSC queries are resolved in this order:
+
+1. `item.gscQueries` (inside each `items[]` entry) — **highest priority**.
+2. `gscQueriesByUrl[item.url]` from the job payload / `analysisConfig` — legacy fallback.
+
+This keeps backward compatibility with legacy payloads while allowing per-item overrides.

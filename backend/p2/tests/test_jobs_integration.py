@@ -99,6 +99,50 @@ class TestJobsIntegration(unittest.TestCase):
         self.assertIn('OPORTUNIDADES', data['items'])
 
     @patch('apps.job_runner.JobRunner.start_worker')
+    @patch('apps.job_runner.run_orchestrated_checklist')
+    def test_item_gsc_queries_take_precedence_over_legacy_map(self, mock_orchestrator, mock_start_worker):
+        mock_orchestrator.return_value = {"status": "GOOD", "summary": "Test result"}
+
+        item_level_queries = [
+            {"query": "item query 1", "clicks": 10, "impressions": 100},
+            {"query": "item query 2", "clicks": 5, "impressions": 80}
+        ]
+        legacy_map_queries = [
+            {"query": "legacy query", "clicks": 1, "impressions": 20}
+        ]
+
+        payload = {
+            "items": [{
+                "url": "https://example.com",
+                "kwPrincipal": "test",
+                "gscQueries": item_level_queries
+            }],
+            "gscQueriesByUrl": {
+                "https://example.com": legacy_map_queries
+            },
+            "analysisConfig": {"mode": "quick"}
+        }
+
+        response = self.client.post('/api/jobs', json=payload)
+        self.assertEqual(response.status_code, 201)
+        job_id = response.get_json()['jobId']
+
+        from apps.job_runner import JobRunner
+        from apps.core.database import get_next_queued_job
+
+        job = get_next_queued_job()
+        self.assertIsNotNone(job)
+        self.assertEqual(job['job_id'], job_id)
+
+        JobRunner.process_job(job)
+
+        mock_orchestrator.assert_called_once()
+        self.assertEqual(
+            mock_orchestrator.call_args.kwargs.get('gscQueries'),
+            item_level_queries
+        )
+
+    @patch('apps.job_runner.JobRunner.start_worker')
     def test_cost_guardrail(self, mock_start_worker):
         # Test advanced mode blocking
         payload = {
