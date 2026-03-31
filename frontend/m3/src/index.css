@@ -1,28 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-sans: 'Inter';
+  --font-sans: 'Manrope';
+  --font-heading: 'Plus Jakarta Sans';
+  --font-ui: 'Manrope';
 
-  --color-primary: 37 99 235;
-  --color-primary-hover: 29 78 216;
-  --color-success: 5 150 105;
-  --color-warning: 217 119 6;
-  --color-danger: 220 38 38;
-  --color-danger-hover: 185 28 28;
-  --color-surface: 255 255 255;
-  --color-surface-alt: 248 250 252;
-  --color-border: 226 232 240;
-  --color-foreground: 15 23 42;
-  --color-muted: 100 116 139;
+  --color-primary: 18 69 185;
+  --color-primary-container: 54 95 211;
+  --color-primary-fixed-dim: 181 196 255;
   --color-on-primary: 255 255 255;
 
-  --color-primary-soft: 219 234 254;
-  --color-success-soft: 209 250 229;
-  --color-warning-soft: 254 243 199;
-  --color-danger-soft: 254 226 226;
+  --color-surface: 248 249 250;
+  --color-surface-container-lowest: 255 255 255;
+  --color-surface-container-low: 243 244 245;
+  --color-surface-container: 237 238 239;
+  --color-surface-container-high: 231 232 233;
+  --color-surface-container-highest: 225 227 228;
+
+  --color-on-surface: 25 28 29;
+  --color-on-surface-variant: 67 70 86;
+  --color-outline-variant: 195 197 217;
+  --color-secondary-fixed: 214 227 255;
+
+  --color-primary-hover: 17 63 169;
+  --color-success: 21 128 61;
+  --color-warning: 202 138 4;
+  --color-danger: 185 28 28;
+  --color-danger-hover: 153 27 27;
   --color-info: 14 116 144;
+
+  --color-surface-alt: var(--color-surface-container-low);
+  --color-border: var(--color-outline-variant);
+  --color-foreground: var(--color-on-surface);
+  --color-muted: var(--color-on-surface-variant);
+
+  --color-primary-soft: var(--color-secondary-fixed);
+  --color-success-soft: 220 252 231;
+  --color-warning-soft: 254 249 195;
+  --color-danger-soft: 254 226 226;
   --color-info-soft: 224 242 254;
 
   --radius-sm: 0.5rem;
@@ -31,21 +50,65 @@
 
   --space-18: 4.5rem;
 
-  --shadow-card: 0 10px 24px -20px rgb(15 23 42 / 0.35);
-  --shadow-brand: 0 12px 20px -16px rgb(37 99 235 / 0.45);
+  --shadow-card: 0 10px 24px -20px rgb(25 28 29 / 0.35);
+  --shadow-brand: 0 12px 20px -16px rgb(18 69 185 / 0.45);
 }
 
 .dark {
-  --color-surface: 30 41 59;
-  --color-surface-alt: 15 23 42;
-  --color-border: 71 85 105;
-  --color-foreground: 241 245 249;
-  --color-muted: 148 163 184;
-  --color-primary-soft: 30 58 138;
-  --color-success-soft: 6 78 59;
-  --color-warning-soft: 120 53 15;
+  --color-primary: 181 196 255;
+  --color-primary-container: 54 95 211;
+  --color-primary-fixed-dim: 107 136 229;
+  --color-on-primary: 10 33 96;
+
+  --color-surface: 24 28 35;
+  --color-surface-container-lowest: 18 22 29;
+  --color-surface-container-low: 30 35 43;
+  --color-surface-container: 36 41 50;
+  --color-surface-container-high: 43 49 58;
+  --color-surface-container-highest: 50 56 66;
+
+  --color-on-surface: 232 236 239;
+  --color-on-surface-variant: 187 191 205;
+  --color-outline-variant: 95 101 118;
+  --color-secondary-fixed: 52 66 106;
+
+  --color-primary-hover: 159 179 246;
+  --color-success: 74 222 128;
+  --color-warning: 250 204 21;
+  --color-danger: 248 113 113;
+  --color-danger-hover: 239 68 68;
+  --color-info: 56 189 248;
+
+  --color-surface-alt: var(--color-surface-container-low);
+  --color-border: var(--color-outline-variant);
+  --color-foreground: var(--color-on-surface);
+  --color-muted: var(--color-on-surface-variant);
+
+  --color-primary-soft: 43 58 97;
+  --color-success-soft: 20 83 45;
+  --color-warning-soft: 113 63 18;
   --color-danger-soft: 127 29 29;
   --color-info-soft: 12 74 110;
+
+  --shadow-card: 0 10px 24px -20px rgb(0 0 0 / 0.7);
+  --shadow-brand: 0 12px 24px -16px rgb(181 196 255 / 0.35);
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-foreground antialiased;
+    font-family: var(--font-ui), system-ui, sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .font-heading {
+    font-family: var(--font-heading), system-ui, sans-serif;
+  }
 }
 
 @layer utilities {
@@ -55,6 +118,7 @@
 
   .section-title {
     @apply text-2xl font-bold text-foreground;
+    font-family: var(--font-heading), system-ui, sans-serif;
   }
 
   .section-subtitle {
@@ -62,7 +126,7 @@
   }
 
   .surface-panel {
-    @apply rounded-brand-lg border border-border bg-surface shadow-card;
+    @apply rounded-brand-lg border border-border bg-surface-container-lowest shadow-card;
   }
 
   .surface-subtle {
@@ -70,7 +134,7 @@
   }
 
   .metric-chip {
-    @apply rounded-brand-md bg-surface-alt p-3;
+    @apply rounded-brand-md bg-surface-container p-3;
   }
 
   .metric-label {
@@ -78,7 +142,7 @@
   }
 
   .form-control {
-    @apply w-full rounded-brand-md border border-border bg-surface-alt px-4 py-2 text-sm text-foreground outline-none transition-all focus:ring-4 focus:ring-primary/20;
+    @apply w-full rounded-brand-md border border-border bg-surface-container-low px-4 py-2 text-sm text-foreground outline-none transition-all focus:ring-4 focus:ring-primary/20;
   }
 
   .form-textarea {
@@ -110,6 +174,6 @@
   }
 
   .overlay-backdrop {
-    @apply fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm;
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm;
   }
 }
