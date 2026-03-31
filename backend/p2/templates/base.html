@@ -22,21 +22,30 @@
           theme: {
             extend: {
               colors: {
+                primary: {
+                  50: '#eef3ff',
+                  100: '#d6e3ff',
+                  200: '#b5c4ff',
+                  500: '#365fd3',
+                  600: '#1245b9',
+                  700: '#0f3898',
+                },
                 slate: {
-                  50: '#f8fafc',
-                  100: '#f1f5f9',
-                  200: '#e2e8f0',
-                  300: '#cbd5e1',
-                  400: '#94a3b8',
-                  500: '#64748b',
-                  600: '#475569',
-                  700: '#334155',
-                  800: '#1e293b',
-                  900: '#0f172a',
+                  50: '#f8f9fa',
+                  100: '#f3f4f5',
+                  200: '#edeeef',
+                  300: '#e7e8e9',
+                  400: '#e1e3e4',
+                  500: '#c3c5d9',
+                  600: '#6b7280',
+                  700: '#434656',
+                  800: '#262a36',
+                  900: '#191c1d',
                 }
               },
               fontFamily: {
-                sans: ['Inter', 'sans-serif'],
+                sans: ['Manrope', 'sans-serif'],
+                jakarta: ['Plus Jakarta Sans', 'sans-serif'],
               }
             }
           }
@@ -44,13 +53,27 @@
     </script>
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --color-primary: #1245b9;
+            --color-primary-container: #365fd3;
+            --color-surface: #f8f9fa;
+            --color-surface-lowest: #ffffff;
+            --color-surface-low: #f3f4f5;
+            --color-outline: #c3c5d9;
+            --color-on-surface: #191c1d;
+            --color-on-surface-variant: #434656;
+            --soft-shadow: 0 14px 32px rgba(25, 28, 29, 0.07);
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
+            font-family: 'Manrope', sans-serif;
+            background-color: var(--color-surface);
+            color: var(--color-on-surface);
             margin: 0; /* Reset body margin manually since preflight is off */
+            -webkit-font-smoothing: antialiased;
         }
 
         /* Manual Reset for Tailwind components since Preflight is off */
@@ -63,8 +86,8 @@
 
         /* Custom scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: var(--color-surface-low); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #d2d5e0; border-radius: 20px; }
 
         /* Bootstrap Conflict Resolution */
         .nav-link { display: block; } /* Fix Bootstrap nav-link if used */
@@ -75,16 +98,16 @@
             display: flex;
             align-items: center;
             gap: 0.75rem; /* 12px */
-            padding: 0.5rem 1rem; /* px-4 py-2 */
-            border-radius: 0.75rem; /* rounded-xl */
-            color: #64748b; /* text-slate-500 */
-            transition: all 0.2s;
+            padding: 0.625rem 1rem;
+            border-radius: 0.9rem;
+            color: var(--color-on-surface-variant);
+            transition: all 0.2s ease;
             font-size: 0.875rem; /* text-sm */
-            font-weight: 500;
+            font-weight: 600;
         }
         .nav-item-custom:hover {
-            background-color: #f1f5f9; /* hover:bg-slate-100 */
-            color: #2563eb; /* hover:text-blue-600 */
+            background-color: #eef3ff;
+            color: var(--color-primary);
         }
         .nav-item-custom i, .nav-item-custom span.icon {
             width: 1.25rem;
@@ -94,12 +117,51 @@
         .sidebar-header-custom {
             font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #94a3b8;
-            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: #8b90a2;
+            font-weight: 800;
             margin-top: 1.5rem;
             margin-bottom: 0.5rem;
             padding-left: 1rem;
+        }
+
+        .bg-white.rounded-2xl,
+        .bg-white.rounded-xl,
+        .bg-white.rounded-3xl {
+            border: 1px solid rgba(195, 197, 217, 0.45);
+            box-shadow: 0 6px 18px rgba(25, 28, 29, 0.04);
+        }
+
+        input, select, textarea {
+            border-radius: 0.9rem !important;
+            border: 1px solid #d9dbe6 !important;
+            background: #fff !important;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: rgba(18, 69, 185, 0.55) !important;
+            box-shadow: 0 0 0 3px rgba(18, 69, 185, 0.12) !important;
+            outline: none !important;
+        }
+
+        .btn, button, [type="button"], [type="submit"] {
+            border-radius: 999px;
+        }
+
+        .table, table {
+            border-collapse: separate;
+            border-spacing: 0;
+            border-color: rgba(195, 197, 217, 0.4);
+        }
+        .table thead th, table thead th {
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #7d8398;
+            background: #f7f8fb;
+        }
+        .table td, .table th, table td, table th {
+            border-color: rgba(195, 197, 217, 0.4) !important;
         }
 
         /* Fix Bootstrap container causing horizontal scroll sometimes */
@@ -133,18 +195,18 @@
     <div class="flex h-screen overflow-hidden">
 
         <!-- SIDEBAR -->
-        <aside class="w-72 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 z-20">
+        <aside class="w-72 bg-white border-r border-slate-200/70 flex flex-col flex-shrink-0 z-20 shadow-[1px_0_12px_rgba(25,28,29,0.03)]">
 
             <!-- Header & Widgets -->
-            <div class="p-5 border-b border-slate-100 flex flex-col gap-4 bg-white">
+            <div class="p-5 border-b border-slate-200/60 flex flex-col gap-4 bg-white">
 
                 <!-- Logo -->
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-500/20">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-500 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary-600/20">
                         M
                     </div>
                     <div>
-                        <h1 class="font-bold text-slate-800 text-lg leading-tight">MediaFlow</h1>
+                        <h1 class="font-jakarta font-extrabold text-slate-800 text-lg leading-tight tracking-tight">MediaFlow</h1>
                         <p class="text-xs text-slate-400 font-medium">SEO Suite v17</p>
                     </div>
                 </div>
@@ -213,7 +275,7 @@
                     <a href="/workflow/master" class="nav-item-custom bg-slate-50 text-slate-700 font-bold border border-slate-200 mt-2 mb-1">
                         <i class="fas fa-project-diagram text-amber-500"></i> <span>WORKFLOW MAESTRO</span>
                     </a>
-                    <a href="/autopilot/dashboard" class="nav-item-custom bg-blue-50 text-blue-700 font-bold border border-blue-100 mb-3">
+                    <a href="/autopilot/dashboard" class="nav-item-custom bg-primary-50 text-primary-700 font-bold border border-primary-100 mb-3">
                         <i class="fas fa-robot text-blue-500"></i> <span>AUTO-PILOT</span>
                     </a>
 
