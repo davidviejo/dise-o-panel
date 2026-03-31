@@ -3,6 +3,8 @@ import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { SeoPage } from '../../types/seoChecklist';
 import { getPageMetrics, getPageQueries } from '../../services/googleSearchConsole';
+import { useSeoChecklistSettings } from '../../hooks/useSeoChecklistSettings';
+import { isBrandTermMatch } from '../../utils/brandTerms';
 
 type KeywordSourceMode = 'all' | 'with_gsc' | 'without_kw';
 
@@ -69,85 +71,118 @@ export const getBestKeywordFromPage = (page: SeoPage, blockedKeywords: Set<strin
   };
 };
 
-export const AutoAssignKeywordsPanel: React.FC<Props> = ({ pages, onBulkUpdate }) => {
-  const [sourceMode, setSourceMode] = useState<KeywordSourceMode>('without_kw');
-  const [status, setStatus] = useState('');
-  const [isLoadingGsc, setIsLoadingGsc] = useState(false);
+export const buildKeywordProposals = (
+  pages: SeoPage[],
+  sourceMode: KeywordSourceMode,
+  brandTerms: string[] = [],
+): KeywordProposal[] => {
+  const pagesWithUsableKeyword = pages.filter(
+    (page) => isUsableKeyword(page.kwPrincipal) && !isBrandTermMatch(page.kwPrincipal || '', brandTerms),
+  );
+  const globallyAssignedKeywords = new Set(
+    pagesWithUsableKeyword.map((page) => page.kwPrincipal.trim().toLowerCase()),
+  );
+  const reservedKeywords = new Set(globallyAssignedKeywords);
 
-  const proposals = useMemo<KeywordProposal[]>(() => {
-    const pagesWithUsableKeyword = pages.filter((page) => isUsableKeyword(page.kwPrincipal));
-    const globallyAssignedKeywords = new Set(
-      pagesWithUsableKeyword.map((page) => page.kwPrincipal.trim().toLowerCase()),
-    );
+  return pages
+    .filter((page) => {
+      if (sourceMode === 'with_gsc') {
+        return (page.gscMetrics?.queryCount || 0) > 0;
+      }
+      if (sourceMode === 'without_kw') {
+        return !isUsableKeyword(page.kwPrincipal);
+      }
+      return true;
+    })
+    .map((page) => {
+      const currentKeyword = (page.kwPrincipal || '').trim();
+      const currentKeywordNormalized = currentKeyword.toLowerCase();
+      const blockedKeywords = new Set(reservedKeywords);
+      if (currentKeywordNormalized) {
+        blockedKeywords.delete(currentKeywordNormalized);
+      }
+      const suggestion = getBestKeywordFromPage(page, blockedKeywords);
+      const isBrandPage = Boolean(page.isBrandKeyword || isBrandTermMatch(currentKeyword, brandTerms));
 
-    return pages
-      .filter((page) => {
-        if (sourceMode === 'with_gsc') {
-          return (page.gscMetrics?.queryCount || 0) > 0;
-        }
-        if (sourceMode === 'without_kw') {
-          return !isUsableKeyword(page.kwPrincipal);
-        }
-        return true;
-      })
-      .map((page) => {
-        const currentKeyword = (page.kwPrincipal || '').trim();
-        const currentKeywordNormalized = currentKeyword.toLowerCase();
-        const blockedKeywords = new Set(globallyAssignedKeywords);
-        if (currentKeywordNormalized) {
-          blockedKeywords.delete(currentKeywordNormalized);
-        }
-        const suggestion = getBestKeywordFromPage(page, blockedKeywords);
-
-        if (page.isBrandKeyword) {
-          return {
-            id: page.id,
-            url: page.url,
-            currentKeyword,
-            proposedKeyword: '',
-            confidence: 'baja' as const,
-            reason: 'URL marcada como keyword de marca; se omite autoasignación.',
-            gscClicks: 0,
-            gscImpressions: 0,
-          };
-        }
-
-        if (!suggestion) {
-          return {
-            id: page.id,
-            url: page.url,
-            currentKeyword,
-            proposedKeyword: '',
-            confidence: 'baja' as const,
-            reason:
-              'Sin queries GSC disponibles o todas ya están asignadas como keyword principal en otras URLs.',
-            gscClicks: 0,
-            gscImpressions: 0,
-          };
-        }
-
-        const confidence: KeywordProposal['confidence'] =
-          suggestion.clicks >= 10 || suggestion.impressions >= 200
-            ? 'alta'
-            : suggestion.clicks >= 3 || suggestion.impressions >= 75
-              ? 'media'
-              : 'baja';
-
+      if (isBrandPage) {
         return {
           id: page.id,
           url: page.url,
           currentKeyword,
-          proposedKeyword: suggestion.keyword,
-          confidence,
+          proposedKeyword: '',
+          confidence: 'baja' as const,
+          reason: 'URL marcada como keyword de marca; se omite autoasignación.',
+          gscClicks: 0,
+          gscImpressions: 0,
+        };
+      }
+
+      if (!suggestion) {
+        return {
+          id: page.id,
+          url: page.url,
+          currentKeyword,
+          proposedKeyword: '',
+          confidence: 'baja' as const,
           reason:
-            currentKeyword.toLowerCase() === suggestion.keyword.toLowerCase()
-              ? 'La keyword actual ya coincide con la mejor query de GSC.'
-              : 'Keyword sugerida desde la query con mejor rendimiento (clics/impresiones).',
+            'Sin queries GSC válidas o todas bloqueadas (marca / ya asignadas en otras URLs).',
+          gscClicks: 0,
+          gscImpressions: 0,
+        };
+      }
+
+      if (isBrandTermMatch(suggestion.keyword, brandTerms)) {
+        return {
+          id: page.id,
+          url: page.url,
+          currentKeyword,
+          proposedKeyword: '',
+          confidence: 'baja' as const,
+          reason: 'La mejor query detectada es de marca; no se propone como KW principal.',
           gscClicks: suggestion.clicks,
           gscImpressions: suggestion.impressions,
         };
-      });
-  }, [pages, sourceMode]);
+      }
+
+      const confidence: KeywordProposal['confidence'] =
+        suggestion.clicks >= 10 || suggestion.impressions >= 200
+          ? 'alta'
+          : suggestion.clicks >= 3 || suggestion.impressions >= 75
+            ? 'media'
+            : 'baja';
+
+      const proposal: KeywordProposal = {
+        id: page.id,
+        url: page.url,
+        currentKeyword,
+        proposedKeyword: suggestion.keyword,
+        confidence,
+        reason:
+          currentKeyword.toLowerCase() === suggestion.keyword.toLowerCase()
+            ? 'La keyword actual ya coincide con la mejor query de GSC.'
+            : 'Keyword sugerida desde la query con mejor rendimiento (clics/impresiones).',
+        gscClicks: suggestion.clicks,
+        gscImpressions: suggestion.impressions,
+      };
+
+      if (proposal.proposedKeyword) {
+        reservedKeywords.add(proposal.proposedKeyword.trim().toLowerCase());
+      }
+
+      return proposal;
+    });
+};
+
+export const AutoAssignKeywordsPanel: React.FC<Props> = ({ pages, onBulkUpdate }) => {
+  const [sourceMode, setSourceMode] = useState<KeywordSourceMode>('without_kw');
+  const [status, setStatus] = useState('');
+  const [isLoadingGsc, setIsLoadingGsc] = useState(false);
+  const { settings } = useSeoChecklistSettings();
+  const activeBrandTerms = useMemo(() => settings.brandTerms || [], [settings.brandTerms]);
+
+  const proposals = useMemo<KeywordProposal[]>(() => {
+    return buildKeywordProposals(pages, sourceMode, activeBrandTerms);
+  }, [activeBrandTerms, pages, sourceMode]);
   const actionableProposalsCount = proposals.filter((proposal) => proposal.proposedKeyword).length;
 
   const loadGscData = async () => {
