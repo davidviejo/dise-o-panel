@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { X, Check } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { useToast } from './ui/ToastContext';
+import { Card } from './ui/Card';
+import { Button } from './ui/Button';
 
 interface BulkActionsModalProps {
   isOpen: boolean;
@@ -109,35 +111,30 @@ const BulkActionsModal: React.FC<BulkActionsModalProps> = ({ isOpen, onClose }) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="overlay-backdrop animate-in fade-in duration-200" onClick={onClose}>
+      <Card className="w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 p-0" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+        <div className="flex justify-between items-center border-b border-border bg-surface-container-low p-6">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Acciones Masivas</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <h2 className="text-xl font-bold text-foreground">Acciones Masivas</h2>
+            <p className="text-sm text-muted">
               Crea múltiples tareas para varias URLs.
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors"
-          >
-            <X size={20} className="text-slate-500 dark:text-slate-400" />
-          </button>
+          <Button onClick={onClose} variant="ghost" size="sm" className="rounded-full"><X size={20} className="text-muted" /></Button>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Module Selector */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Módulo Destino
             </label>
             <select
               value={effectiveTargetModuleId}
               onChange={(e) => setTargetModuleId(Number(e.target.value))}
-              className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+              className="form-control"
             >
               {modules.map((m) => (
                 <option key={m.id} value={m.id}>
@@ -149,16 +146,16 @@ const BulkActionsModal: React.FC<BulkActionsModalProps> = ({ isOpen, onClose }) 
 
           {/* URLs Input */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               URLs (una por línea)
             </label>
             <textarea
               value={urls}
               onChange={(e) => setUrls(e.target.value)}
               placeholder="https://ejemplo.com/pagina1&#10;https://ejemplo.com/pagina2"
-              className="w-full h-32 p-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+              className="form-textarea h-32 resize-none"
             />
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-muted mt-1">
               Se crearán tareas para cada combinación de URL y Acción seleccionada.
             </p>
           </div>
@@ -166,17 +163,19 @@ const BulkActionsModal: React.FC<BulkActionsModalProps> = ({ isOpen, onClose }) 
           {/* Actions Selection */}
           <div>
             <div className="flex justify-between items-center mb-3">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+              <label className="block text-sm font-medium text-foreground">
                 Seleccionar Acciones
               </label>
-              <button
+              <Button
                 onClick={handleSelectAll}
-                className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                variant="ghost"
+                size="sm"
+                className="text-xs font-semibold text-primary"
               >
                 {selectedActions.size === ACTION_TYPES.length
                   ? 'Deseleccionar todo'
                   : 'Seleccionar todo'}
-              </button>
+              </Button>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -187,14 +186,14 @@ const BulkActionsModal: React.FC<BulkActionsModalProps> = ({ isOpen, onClose }) 
                   className={`flex items-center gap-2 p-3 rounded-lg border text-left text-sm transition-all ${
                     selectedActions.has(action)
                       ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                      : 'border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300'
+                      : 'border-border bg-surface-container-low text-foreground hover:border-primary/40'
                   }`}
                 >
                   <div
                     className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
                       selectedActions.has(action)
-                        ? 'bg-blue-500 border-blue-500'
-                        : 'border-slate-400 bg-white dark:bg-slate-800'
+                        ? 'bg-primary border-primary'
+                        : 'border-border bg-surface-container-lowest'
                     }`}
                   >
                     {selectedActions.has(action) && <Check size={10} className="text-white" />}
@@ -207,17 +206,12 @@ const BulkActionsModal: React.FC<BulkActionsModalProps> = ({ isOpen, onClose }) 
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors font-medium"
-          >
-            Cancelar
-          </button>
-          <button
+        <div className="flex justify-end gap-3 border-t border-border bg-surface-container-low p-6">
+          <Button onClick={onClose} variant="secondary">Cancelar</Button>
+          <Button
             onClick={handleCreate}
             disabled={urlList.length === 0 || selectedActions.size === 0}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-6"
           >
             <Check size={18} />
             Crear{' '}
@@ -225,9 +219,9 @@ const BulkActionsModal: React.FC<BulkActionsModalProps> = ({ isOpen, onClose }) 
               ? urlList.length * selectedActions.size
               : ''}{' '}
             Tareas
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

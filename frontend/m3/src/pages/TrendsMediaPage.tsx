@@ -9,6 +9,8 @@ import { processNews } from '../features/trends-media/services/newsProcessor';
 import { fetchSerpResults } from '../features/trends-media/services/serp';
 import { getSettings } from '../features/trends-media/services/storage';
 import { AppSettings, DashboardStats as StatsType, NewsCluster, NewsPriority } from '../features/trends-media/types';
+import { Card } from '../components/ui/Card';
+import { Badge } from '../components/ui/Badge';
 
 const viewOptions = [
   { id: 'dashboard', label: 'Dashboard' },
@@ -70,7 +72,7 @@ const TrendsMediaPage: React.FC = () => {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6">
-      <section className="overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 text-white shadow-xl">
+      <section className="overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 text-white shadow-xl">
         <div className="flex flex-col gap-6 px-8 py-8 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-3xl">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-100">
@@ -83,11 +85,11 @@ const TrendsMediaPage: React.FC = () => {
 
           <div className="flex flex-wrap items-center gap-3">
             {viewOptions.map((view) => (
-              <button key={view.id} type="button" onClick={() => setCurrentView(view.id)} className={`rounded-full px-4 py-2 text-sm font-medium transition ${currentView === view.id ? 'bg-white text-slate-900' : 'bg-white/10 text-white hover:bg-white/20'}`}>
+              <button key={view.id} type="button" onClick={() => setCurrentView(view.id)} className={`rounded-full px-4 py-2 text-sm font-semibold transition ${currentView === view.id ? 'bg-white text-slate-900' : 'bg-white/10 text-white hover:bg-white/20'}`}>
                 {view.label}
               </button>
             ))}
-            <button onClick={runPipeline} disabled={pipelineStatus === 'fetching' || pipelineStatus === 'analyzing'} className="inline-flex items-center gap-2 rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:bg-slate-500">
+            <button onClick={runPipeline} disabled={pipelineStatus === 'fetching' || pipelineStatus === 'analyzing'} className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-slate-500">
               {pipelineStatus === 'fetching' || pipelineStatus === 'analyzing' ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
               <span>{newsClusters.length > 0 ? 'Actualizar SERPs' : 'Analizar SERPs'}</span>
             </button>
@@ -101,20 +103,20 @@ const TrendsMediaPage: React.FC = () => {
       {currentView === 'dashboard' && (
         <div className="space-y-8">
           <DashboardStats stats={stats} trends={MOCK_TRENDS} />
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-6 py-4">
-              <h3 className="text-lg font-semibold text-slate-800">Últimas Noticias Detectadas</h3>
-              {newsClusters.length > 0 && <span className="text-xs font-medium text-slate-500">{newsClusters.length} clusters</span>}
+          <Card className="overflow-hidden p-0">
+            <div className="flex items-center justify-between border-b border-border bg-surface-container-low px-6 py-4">
+              <h3 className="text-lg font-semibold text-foreground">Últimas Noticias Detectadas</h3>
+              {newsClusters.length > 0 && <span className="text-xs font-medium text-muted">{newsClusters.length} clusters</span>}
             </div>
             {newsClusters.length === 0 ? (
-              <div className="p-12 text-center text-slate-400">
+              <div className="p-12 text-center text-muted">
                 <p className="mb-4">No hay datos analizados todavía.</p>
-                <button onClick={runPipeline} className="mx-auto flex items-center justify-center font-medium text-blue-600 hover:underline">Ejecutar análisis ahora</button>
+                <button onClick={runPipeline} className="mx-auto flex items-center justify-center font-medium text-primary hover:underline">Ejecutar análisis ahora</button>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="border-b border-slate-200 bg-slate-50 font-medium text-slate-500">
+                  <thead className="border-b border-border bg-surface-container-low font-medium text-muted">
                     <tr>
                       <th className="w-24 px-6 py-3">Prio</th>
                       <th className="px-6 py-3">Score</th>
@@ -123,28 +125,28 @@ const TrendsMediaPage: React.FC = () => {
                       <th className="px-6 py-3">Fuente Top</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-border/50">
                     {newsClusters.slice(0, 5).map((item) => (
-                      <tr key={item.cluster_id} className="hover:bg-slate-50">
+                      <tr key={item.cluster_id} className="hover:bg-surface-container-low">
                         <td className="px-6 py-3">
-                          <span className={`rounded px-2 py-0.5 text-xs font-bold ${item.ai_analysis?.priority === NewsPriority.P1 ? 'bg-red-100 text-red-700' : item.ai_analysis?.priority === NewsPriority.P2 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>{item.ai_analysis?.priority}</span>
+                          <Badge variant={item.ai_analysis?.priority === NewsPriority.P1 ? 'danger' : item.ai_analysis?.priority === NewsPriority.P2 ? 'warning' : 'neutral'}>{item.ai_analysis?.priority}</Badge>
                         </td>
-                        <td className="px-6 py-3 font-mono text-xs font-bold text-blue-600">{item.score}</td>
-                        <td className="px-6 py-3 font-medium text-slate-800">{item.ai_analysis?.suggestedTitle}</td>
-                        <td className="px-6 py-3 text-slate-500">{item.ai_analysis?.category}</td>
-                        <td className="px-6 py-3 text-slate-400">{item.top_source}</td>
+                        <td className="px-6 py-3 font-mono text-xs font-bold text-primary">{item.score}</td>
+                        <td className="px-6 py-3 font-medium text-foreground">{item.ai_analysis?.suggestedTitle}</td>
+                        <td className="px-6 py-3 text-muted">{item.ai_analysis?.category}</td>
+                        <td className="px-6 py-3 text-muted">{item.top_source}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
                 {newsClusters.length > 5 && (
-                  <div className="border-t border-slate-100 p-3 text-center">
-                    <button onClick={() => setCurrentView('brief')} className="text-xs font-medium text-blue-600 hover:text-blue-800">Ver todos ({newsClusters.length}) →</button>
+                  <div className="border-t border-border/60 p-3 text-center">
+                    <button onClick={() => setCurrentView('brief')} className="text-xs font-medium text-primary hover:opacity-80">Ver todos ({newsClusters.length}) →</button>
                   </div>
                 )}
               </div>
             )}
-          </div>
+          </Card>
         </div>
       )}
 

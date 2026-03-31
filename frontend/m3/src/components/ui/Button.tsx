@@ -12,9 +12,9 @@ const variantClasses: Record<ButtonVariant, string> = {
   primary:
     'bg-primary text-on-primary border border-transparent hover:bg-primary-hover focus-visible:ring-primary/40 shadow-brand',
   secondary:
-    'bg-surface text-foreground border border-border hover:bg-surface-alt focus-visible:ring-primary/20',
+    'bg-surface-container-low text-foreground border border-border hover:bg-surface-container focus-visible:ring-primary/20',
   ghost:
-    'bg-transparent text-foreground border border-transparent hover:bg-surface-alt focus-visible:ring-primary/20',
+    'bg-transparent text-foreground border border-transparent hover:bg-surface-container-low focus-visible:ring-primary/20',
   danger:
     'bg-danger text-on-primary border border-transparent hover:bg-danger-hover focus-visible:ring-danger/40 shadow-brand',
 };
@@ -30,7 +30,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     <button
       ref={ref}
       type={type}
-      className={`inline-flex items-center justify-center gap-2 rounded-brand-md font-medium transition-all focus-visible:outline-none focus-visible:ring-4 disabled:cursor-not-allowed disabled:opacity-50 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-brand-md font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 disabled:cursor-not-allowed disabled:opacity-50 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       {...props}
     />
   ),

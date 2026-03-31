@@ -7,11 +7,11 @@ interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantClasses: Record<BadgeVariant, string> = {
-  primary: 'bg-primary-soft text-primary',
-  success: 'bg-success-soft text-success',
-  warning: 'bg-warning-soft text-warning',
-  danger: 'bg-danger-soft text-danger',
-  neutral: 'bg-surface-alt text-muted',
+  primary: 'bg-primary-soft text-primary border border-primary/20',
+  success: 'bg-success-soft text-success border border-success/20',
+  warning: 'bg-warning-soft text-warning border border-warning/20',
+  danger: 'bg-danger-soft text-danger border border-danger/20',
+  neutral: 'bg-surface-container text-muted border border-border',
 };
 
 export const Badge: React.FC<BadgeProps> = ({ variant = 'neutral', className = '', ...props }) => {
