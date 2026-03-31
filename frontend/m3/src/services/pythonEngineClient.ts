@@ -4,6 +4,8 @@ import { endpoints } from './endpoints';
 
 const engineHttpClient = createHttpClient({ service: 'engine' });
 
+export const ENGINE_ANALYZE_TIMEOUT_MS = 90000;
+
 export interface AnalysisPayload {
   url: string;
   kwPrincipal: string;
@@ -170,13 +172,27 @@ export const getCapabilities = async (): Promise<Capabilities | null> => {
   }
 };
 
-export const analyzeUrl = async (payload: AnalysisPayload): Promise<AnalysisResponse> => {
+export const analyzeUrl = async (
+  payload: AnalysisPayload,
+  options: { timeoutMs?: number } = {},
+): Promise<AnalysisResponse> => {
+  const timeoutMs = options.timeoutMs ?? ENGINE_ANALYZE_TIMEOUT_MS;
+
   try {
-    const data = await engineHttpClient.post<AnalysisResponse>(endpoints.engine.analyze(), payload);
+    const data = await engineHttpClient.post<AnalysisResponse>(endpoints.engine.analyze(), payload, { timeoutMs });
     return data as AnalysisResponse;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Python Engine Error:', error);
-    throw new Error(error.message || 'Error connecting to Python Engine');
+
+    if (error instanceof HttpClientError && error.isTimeout) {
+      throw new Error('El análisis superó el tiempo de espera. Intenta nuevamente.');
+    }
+
+    if (error instanceof HttpClientError) {
+      throw new Error(error.message || 'Error del backend durante el análisis');
+    }
+
+    throw new Error((error as Error)?.message || 'Error connecting to Python Engine');
   }
 };
 
@@ -222,32 +238,40 @@ export const getBatchJobItems = async (
   page: number = 1,
   limit: number = 50,
 ): Promise<{ items: BatchJobItem[]; total: number }> => {
-  const params = new URLSearchParams({
-    page: page.toString(),
-    pageSize: limit.toString(),
-  });
-
   const normalizedStatus = status
     ?.split(',')
     .map((entry) => entry.trim())
-    .filter(Boolean)
-    .join(',');
+    .filter(Boolean);
 
-  if (normalizedStatus) {
-    params.append('status', normalizedStatus);
+  const statusesToFetch = normalizedStatus && normalizedStatus.length > 0 ? normalizedStatus : [undefined];
+
+  const responses: RawBatchJobItemsResponse[] = [];
+  for (const statusFilter of statusesToFetch) {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: limit.toString(),
+    });
+    if (statusFilter) {
+      params.append('status', statusFilter);
+    }
+
+    try {
+      responses.push(
+        await engineHttpClient.get<RawBatchJobItemsResponse>(endpoints.engine.jobItems(jobId, params)),
+      );
+    } catch (error) {
+      throw buildError(error, 'Failed to get job items');
+    }
   }
 
-  let data: RawBatchJobItemsResponse;
-  try {
-    data = await engineHttpClient.get<RawBatchJobItemsResponse>(endpoints.engine.jobItems(jobId, params));
-  } catch (error) {
-    throw buildError(error, 'Failed to get job items');
-  }
-
-  return {
-    items: (data.items || []).map(normalizeBatchJobItem),
-    total: data.total || 0,
-  };
+  return responses.reduce(
+    (acc, data) => {
+      acc.items.push(...(data.items || []).map(normalizeBatchJobItem));
+      acc.total += data.total || 0;
+      return acc;
+    },
+    { items: [] as BatchJobItem[], total: 0 },
+  );
 };
 
 export const getBatchJobItemResult = async (

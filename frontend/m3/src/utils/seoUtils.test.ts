@@ -6,6 +6,7 @@ import { SeoPage } from '../types/seoChecklist';
 // Mock dependencies
 vi.mock('../services/pythonEngineClient', () => ({
   analyzeUrl: vi.fn(),
+  ENGINE_ANALYZE_TIMEOUT_MS: 90000,
 }));
 
 vi.mock('../services/googleSearchConsole', () => ({

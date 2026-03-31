@@ -4,7 +4,7 @@ import {
   AnalysisConfigPayload,
   SeoChecklistSettings,
 } from '../types/seoChecklist';
-import { analyzeUrl, AnalysisResponse } from '../services/pythonEngineClient';
+import { analyzeUrl, AnalysisResponse, ENGINE_ANALYZE_TIMEOUT_MS } from '../services/pythonEngineClient';
 import { getPageMetrics, getPageQueries } from '../services/googleSearchConsole';
 import { normalizeSeoPageInput } from './seoUrlNormalizer';
 import { isBrandTermMatch } from './brandTerms';
@@ -314,16 +314,19 @@ export const runPageAnalysis = async (
     }
   }
 
-  const result = await analyzeUrl({
-    url: normalizedPage.url,
-    kwPrincipal: normalizedPage.kwPrincipal,
-    pageType: normalizedPage.pageType,
-    geoTarget: normalizedPage.geoTarget,
-    cluster: normalizedPage.cluster,
-    pageId: normalizedPage.id,
-    gscQueries,
-    analysisConfig: resolvedAnalysisConfig,
-  });
+  const result = await analyzeUrl(
+    {
+      url: normalizedPage.url,
+      kwPrincipal: normalizedPage.kwPrincipal,
+      pageType: normalizedPage.pageType,
+      geoTarget: normalizedPage.geoTarget,
+      cluster: normalizedPage.cluster,
+      pageId: normalizedPage.id,
+      gscQueries,
+      analysisConfig: resolvedAnalysisConfig,
+    },
+    { timeoutMs: ENGINE_ANALYZE_TIMEOUT_MS },
+  );
 
   const updates = processAnalysisResult(
     normalizedPage,

@@ -71,10 +71,38 @@ describe('httpClient', () => {
     const assertion = expect(request).rejects.toMatchObject({
       name: 'HttpClientError',
       message: 'Request timeout after 10ms',
+      isTimeout: true,
     });
 
     await vi.advanceTimersByTimeAsync(20);
     await assertion;
+  });
+
+  it('uses a longer default timeout for engine requests', async () => {
+    vi.useFakeTimers();
+
+    fetchMock.mockImplementationOnce(async (_url: string, init?: RequestInit) => {
+      await new Promise((resolve, reject) => {
+        init?.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')));
+      });
+      return { ok: true, status: 200, json: async () => ({}) };
+    });
+
+    const engineClient = createHttpClient({ service: 'engine' });
+    const request = engineClient.get('engine/slow');
+    let settled = false;
+    request.catch(() => {
+      settled = true;
+    });
+
+    await vi.advanceTimersByTimeAsync(12000);
+    expect(settled).toBe(false);
+
+    await vi.advanceTimersByTimeAsync(78001);
+    await expect(request).rejects.toMatchObject({
+      message: 'Request timeout after 90000ms',
+      isTimeout: true,
+    });
   });
 
   it('uses resolveApiUrl/resolveEngineUrl as baseURL fallback', () => {
