@@ -59,10 +59,10 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon, label, subLabel, onClick, i
     <NavLink
       to={to}
       onClick={onClick}
-      className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+      className={`relative flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 focus-visible:ring-offset-2 ${
         isActive
-          ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-          : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
+          ? 'border-blue-200 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_16px_28px_-18px_rgba(37,99,235,0.9)]'
+          : 'border-slate-200/80 bg-white/70 text-slate-600 hover:border-blue-100 hover:bg-blue-50/80 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800/70 dark:text-slate-300 dark:hover:border-blue-900/40 dark:hover:bg-slate-800 dark:hover:text-white'
       }`}
     >
       <div
@@ -71,10 +71,10 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon, label, subLabel, onClick, i
         {icon}
       </div>
       <div className="flex flex-col flex-1">
-        <span className={`text-sm font-medium ${isActive ? 'text-white' : ''}`}>{label}</span>
+        <span className={`text-sm font-semibold ${isActive ? 'text-white' : ''}`}>{label}</span>
         {subLabel && (
           <span
-            className={`text-[10px] uppercase tracking-wider ${isActive ? 'text-blue-200' : 'text-slate-400'}`}
+            className={`text-[10px] uppercase tracking-wider ${isActive ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'}`}
           >
             {subLabel}
           </span>
@@ -348,18 +348,18 @@ const Layout: React.FC<LayoutProps> = ({
   };
 
   const header = (
-    <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 shadow-sm">
+    <header className="h-20 border-b border-slate-200/70 bg-slate-50/95 dark:border-slate-800 dark:bg-slate-900/95 backdrop-blur-md flex items-center justify-between px-4 lg:px-6 shadow-[0_8px_30px_-24px_rgba(15,23,42,0.7)]">
         <div className="flex items-center gap-8">
           {/* Logo */}
-          <div className="flex items-center gap-2 font-bold text-xl text-slate-900 dark:text-white">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+          <div className="flex items-center gap-3 font-bold text-xl text-slate-900 dark:text-white">
+            <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-blue-500/30">
               M
             </div>
             <span className="hidden lg:block">MediaFlow</span>
           </div>
 
           {/* Tabs */}
-          <nav className="hidden lg:flex items-center space-x-1">
+          <nav className="hidden lg:flex items-center space-x-1 rounded-2xl border border-slate-200/80 bg-white/80 p-1.5 shadow-sm dark:border-slate-700 dark:bg-slate-800/80">
             {(['analitica', 'estrategia', 'acciones', 'backend', 'admin'] as TabType[]).map(
               (tab) => {
                 let toPath = '/app/';
@@ -377,10 +377,10 @@ const Layout: React.FC<LayoutProps> = ({
                       e.preventDefault();
                       handleTabChange(tab);
                     }}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${
+                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all capitalize ${
                       activeTab === tab
-                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-100 dark:ring-blue-800'
-                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200'
+                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/30'
+                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100'
                     }`}
                   >
                     {tab === 'backend' ? 'Python Backend' : tab === 'analitica' ? 'Analítica' : tab}
@@ -394,13 +394,21 @@ const Layout: React.FC<LayoutProps> = ({
         {/* Mobile Menu Toggle */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="lg:hidden text-slate-600 dark:text-slate-300"
+          className="lg:hidden h-10 w-10 rounded-xl border border-slate-200 bg-white/80 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
         >
           {isMobileMenuOpen ? <X /> : <Menu />}
         </button>
 
         {/* Right Side Actions */}
         <div className="hidden lg:flex items-center gap-3">
+          <div className="relative w-72">
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Buscar proyectos o tareas..."
+              className="w-full rounded-full border border-slate-200 bg-white/90 py-2.5 pl-10 pr-4 text-sm text-slate-700 outline-none transition-all focus:border-blue-200 focus:ring-4 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-200 dark:focus:border-blue-700 dark:focus:ring-blue-900/40"
+            />
+          </div>
           {clients && currentClientId && onSwitchClient && onAddClient && onDeleteClient && (
             <div className="w-64">
               <ClientSwitcher
@@ -416,9 +424,12 @@ const Layout: React.FC<LayoutProps> = ({
           <LanguageSwitcher />
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className="p-2 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 transition-colors"
+            className="h-10 w-10 flex items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-blue-600 hover:border-blue-100 hover:bg-blue-50 transition-colors dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
           >
             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+          <button className="h-10 w-10 rounded-full border-2 border-blue-100 bg-gradient-to-br from-blue-600 to-indigo-600 text-xs font-bold text-white shadow-md shadow-blue-500/30">
+            MF
           </button>
         </div>
       </header>
@@ -427,9 +438,9 @@ const Layout: React.FC<LayoutProps> = ({
   const sidebar = (
     <aside
         className={`
-        fixed top-16 bottom-0 left-0 z-40 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col pt-4
+        fixed top-20 bottom-0 left-0 z-40 w-80 bg-slate-50/95 dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col pt-5
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:mt-16
+        lg:mt-20
       `}
       >
         <div className="px-4 pb-4 flex-1 overflow-y-auto custom-scrollbar flex flex-col">
@@ -465,10 +476,10 @@ const Layout: React.FC<LayoutProps> = ({
                         handleTabChange(tab);
                         setIsMobileMenuOpen(false);
                       }}
-                      className={`block text-center px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors border ${
+                      className={`block text-center px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border ${
                         activeTab === tab
-                          ? 'bg-blue-600 text-white border-blue-600'
-                          : 'text-slate-500 border-slate-200 dark:border-slate-700 hover:bg-slate-50'
+                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-500'
+                          : 'text-slate-500 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
                       }`}
                     >
                       {tab === 'backend' ? 'Python' : tab === 'analitica' ? 'Analítica' : tab}
@@ -480,7 +491,7 @@ const Layout: React.FC<LayoutProps> = ({
           </div>
 
           {activeTab === 'analitica' && (
-            <div className="bg-slate-900 dark:bg-slate-800 rounded-2xl p-4 text-white relative overflow-hidden mb-6 border border-slate-800 dark:border-slate-700 shrink-0">
+            <div className="bg-slate-900 dark:bg-slate-800 rounded-3xl p-5 text-white relative overflow-hidden mb-6 border border-slate-800 dark:border-slate-700 shrink-0 shadow-[0_24px_44px_-34px_rgba(15,23,42,0.85)]">
               <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500 rounded-full blur-3xl opacity-20 -mr-10 -mt-10"></div>
               <p className="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">
                 {t('global_score')}
@@ -498,12 +509,12 @@ const Layout: React.FC<LayoutProps> = ({
             </div>
           )}
 
-          <nav className="space-y-1 pr-2">{renderSidebarContent()}</nav>
+          <nav className="space-y-2 pr-2">{renderSidebarContent()}</nav>
 
           <div className="mt-auto pt-6 pb-2 space-y-3">
             <button
               onClick={handleEmergencyIndex}
-              className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-white font-bold transition-all shadow-lg ${isEmergencyLoading ? 'bg-red-700' : 'bg-red-600 hover:bg-red-700 animate-pulse-slow'}`}
+              className={`w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl text-white font-bold transition-all shadow-lg ${isEmergencyLoading ? 'bg-red-700' : 'bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 animate-pulse-slow'}`}
             >
               {isEmergencyLoading ? (
                 <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
@@ -515,14 +526,14 @@ const Layout: React.FC<LayoutProps> = ({
 
             <button
               onClick={() => setShowShortcuts(!showShortcuts)}
-              className="w-full flex items-center justify-center gap-2 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2"
+              className="w-full flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white/80 p-2.5 text-xs font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
               <Keyboard size={14} /> {t('nav.shortcuts')}
             </button>
 
             <button
               onClick={() => setIsNotesOpen(true)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 mt-2 rounded-xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 mt-2 rounded-2xl border border-slate-200 bg-white text-slate-600 hover:text-blue-700 hover:border-blue-100 hover:bg-blue-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors"
             >
               <StickyNote size={20} />
               <span className="font-medium">{t('nav.notes')}</span>
@@ -533,7 +544,7 @@ const Layout: React.FC<LayoutProps> = ({
   );
 
   return (
-    <InternalShell header={header} sidebar={sidebar} contentClassName="flex-1 overflow-auto pt-16 w-full">
+    <InternalShell header={header} sidebar={sidebar} contentClassName="flex-1 overflow-auto pt-20 w-full">
       <ConfirmDialog
         isOpen={showEmergencyConfirm}
         title={t('feedback.confirm.emergency_index_title')}
@@ -557,7 +568,7 @@ const Layout: React.FC<LayoutProps> = ({
       />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-slate-50/50 dark:bg-slate-900/50 w-full relative">
+      <main className="flex-1 overflow-auto bg-slate-100/70 dark:bg-slate-950 w-full relative">
         <div className="max-w-7xl mx-auto p-4 lg:p-8">{children}</div>
 
         {/* Shortcuts Modal (Simple) */}
@@ -567,7 +578,7 @@ const Layout: React.FC<LayoutProps> = ({
             onClick={() => setShowShortcuts(false)}
           >
             <div
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-2xl max-w-sm w-full border border-slate-200 dark:border-slate-700"
+              className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-2xl max-w-sm w-full border border-slate-200 dark:border-slate-700"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-4">

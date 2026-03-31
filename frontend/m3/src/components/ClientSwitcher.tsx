@@ -81,10 +81,10 @@ const ClientSwitcher: React.FC<ClientSwitcherProps> = ({
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700 group"
+        className="w-full flex items-center justify-between p-3 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700 group shadow-[0_10px_24px_-24px_rgba(15,23,42,0.9)]"
       >
         <div className="flex items-center gap-3 overflow-hidden">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xs shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shrink-0">
             {currentClient ? currentClient.name.substring(0, 2).toUpperCase() : 'MF'}
           </div>
           <div className="text-left overflow-hidden">
@@ -112,14 +112,14 @@ const ClientSwitcher: React.FC<ClientSwitcherProps> = ({
               setShowAddForm(false);
             }}
           ></div>
-          <div className="absolute top-full left-0 w-full mt-2 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top">
+          <div className="absolute top-full left-0 w-full mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top">
             {!showAddForm ? (
               <div className="max-h-80 overflow-y-auto">
                 <div className="p-2 space-y-1">
                   {clients.map((client) => (
                     <div
                       key={client.id}
-                      className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${client.id === currentClientId ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                      className={`group flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-colors ${client.id === currentClientId ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}
                       onClick={() => {
                         onSwitchClient(client.id);
                         setIsOpen(false);
@@ -159,7 +159,7 @@ const ClientSwitcher: React.FC<ClientSwitcherProps> = ({
                 <div className="p-2 border-t border-slate-100 dark:border-slate-800">
                   <button
                     onClick={() => setShowAddForm(true)}
-                    className="w-full flex items-center justify-center gap-2 p-2 rounded-lg text-sm font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl text-sm font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
                   >
                     <Plus size={16} /> Nuevo Proyecto
                   </button>
@@ -170,7 +170,7 @@ const ClientSwitcher: React.FC<ClientSwitcherProps> = ({
                 </div>
               </div>
             ) : (
-              <div className="p-3">
+                <div className="p-4">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-bold text-slate-500 uppercase">Nuevo Proyecto</span>
                   <button
@@ -184,7 +184,7 @@ const ClientSwitcher: React.FC<ClientSwitcherProps> = ({
                   autoFocus
                   type="text"
                   placeholder="Nombre del Cliente/Medio"
-                  className="w-full p-2 text-sm border rounded-lg bg-slate-50 dark:bg-slate-800 dark:border-slate-600 mb-3 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-2.5 text-sm border rounded-xl bg-slate-50 dark:bg-slate-800 dark:border-slate-600 mb-3 outline-none focus:ring-2 focus:ring-blue-500"
                   value={newClientName}
                   onChange={(e) => setNewClientName(e.target.value)}
                 />
@@ -195,7 +195,7 @@ const ClientSwitcher: React.FC<ClientSwitcherProps> = ({
                     <button
                       key={v}
                       onClick={() => setNewClientVertical(v)}
-                      className={`p-2 rounded-lg border flex flex-col items-center justify-center gap-1 transition-all ${newClientVertical === v ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 text-blue-600' : 'border-slate-200 dark:border-slate-700 text-slate-400 hover:bg-slate-50'}`}
+                      className={`p-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${newClientVertical === v ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 text-blue-600' : 'border-slate-200 dark:border-slate-700 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
                     >
                       {getVerticalIcon(v)}
                       <span className="text-[9px] uppercase font-bold">{v}</span>
@@ -205,7 +205,7 @@ const ClientSwitcher: React.FC<ClientSwitcherProps> = ({
                 <button
                   onClick={handleAdd}
                   disabled={!newClientName.trim()}
-                  className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-bold hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Crear Proyecto
                 </button>
