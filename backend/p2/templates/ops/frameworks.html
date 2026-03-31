@@ -2,6 +2,225 @@
 
 {% block title %}SEO Frameworks{% endblock %}
 
+
+{% block page_styles %}
+<style>
+    .frameworks-page {
+        max-width: 1440px;
+        margin: 0 auto;
+    }
+
+    .frameworks-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 55%, #38bdf8 100%);
+        box-shadow: 0 28px 80px rgba(37, 99, 235, 0.18);
+    }
+
+    .frameworks-hero::before,
+    .frameworks-hero::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(10px);
+        opacity: 0.35;
+    }
+
+    .frameworks-hero::before {
+        width: 220px;
+        height: 220px;
+        background: rgba(255,255,255,0.18);
+        top: -70px;
+        right: 8%;
+    }
+
+    .frameworks-hero::after {
+        width: 160px;
+        height: 160px;
+        background: rgba(191,219,254,0.28);
+        bottom: -60px;
+        right: 28%;
+    }
+
+    .frameworks-kicker {
+        font-size: 0.82rem;
+        letter-spacing: 0.02em;
+    }
+
+    .frameworks-chip,
+    .summary-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        padding: 0.65rem 0.95rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.16);
+        backdrop-filter: blur(8px);
+        font-size: 0.92rem;
+    }
+
+    .summary-pill {
+        background: #eff6ff;
+        color: #1e3a8a;
+        border-color: #bfdbfe;
+    }
+
+    .frameworks-panel,
+    .workspace-panel,
+    .report-panel,
+    .queue-context {
+        background: rgba(255,255,255,0.94);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+        border: 1px solid #e2e8f0;
+    }
+
+    .frameworks-toolbar .form-control,
+    .frameworks-toolbar .input-group-text,
+    .workspace-panel .form-control,
+    .workspace-panel .form-select {
+        border-color: #dbe4f0;
+    }
+
+    .btn-filter {
+        border-radius: 999px;
+        padding: 0.6rem 1rem;
+        border: 1px solid #dbe4f0;
+        background: #fff;
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .btn-filter:hover,
+    .btn-filter.active {
+        background: #0f172a;
+        border-color: #0f172a;
+        color: #fff;
+    }
+
+    .framework-shell {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .framework-shell:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.10) !important;
+    }
+
+    .framework-icon {
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.65rem;
+    }
+
+    .framework-outcome,
+    .queue-empty,
+    .final-report-preview {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+
+    .queue-empty {
+        border-style: dashed;
+    }
+
+    .framework-step,
+    .queue-item {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 1rem;
+        align-items: center;
+        padding: 1rem 1.1rem;
+        border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+    }
+
+    .queue-item.active {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .queue-item.completed {
+        border-color: #16a34a;
+        background: #f0fdf4;
+    }
+
+    .queue-item.pending {
+        border-style: dashed;
+    }
+
+    .queue-item-controls {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+
+    .step-number,
+    .queue-badge-number {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 999px;
+        background: #e2e8f0;
+        color: #0f172a;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.95rem;
+        flex-shrink: 0;
+    }
+
+    .framework-step h3,
+    .queue-item h3 {
+        margin: 0 0 0.2rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .framework-step p,
+    .queue-item p {
+        margin: 0;
+        font-size: 0.92rem;
+        color: #64748b;
+    }
+
+    .final-report-preview {
+        padding: 1rem;
+        min-height: 320px;
+        white-space: pre-wrap;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .framework-card.is-hidden {
+        display: none;
+    }
+
+    @media (max-width: 991.98px) {
+        .framework-step,
+        .queue-item {
+            grid-template-columns: auto 1fr;
+        }
+
+        .framework-step .btn,
+        .queue-item .btn,
+        .queue-item-controls {
+            grid-column: 1 / -1;
+            width: 100%;
+        }
+
+        .framework-meta {
+            text-align: left !important;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid frameworks-page">
     <section class="frameworks-hero rounded-4 p-4 p-lg-5 mb-4 overflow-hidden position-relative">
@@ -468,221 +687,7 @@
 
 {% block scripts %}
 {{ super() }}
-<style>
-    .frameworks-page {
-        max-width: 1440px;
-        margin: 0 auto;
-    }
 
-    .frameworks-hero {
-        background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 55%, #38bdf8 100%);
-        box-shadow: 0 28px 80px rgba(37, 99, 235, 0.18);
-    }
-
-    .frameworks-hero::before,
-    .frameworks-hero::after {
-        content: "";
-        position: absolute;
-        border-radius: 999px;
-        filter: blur(10px);
-        opacity: 0.35;
-    }
-
-    .frameworks-hero::before {
-        width: 220px;
-        height: 220px;
-        background: rgba(255,255,255,0.18);
-        top: -70px;
-        right: 8%;
-    }
-
-    .frameworks-hero::after {
-        width: 160px;
-        height: 160px;
-        background: rgba(191,219,254,0.28);
-        bottom: -60px;
-        right: 28%;
-    }
-
-    .frameworks-kicker {
-        font-size: 0.82rem;
-        letter-spacing: 0.02em;
-    }
-
-    .frameworks-chip,
-    .summary-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: rgba(255, 255, 255, 0.12);
-        color: #fff;
-        padding: 0.65rem 0.95rem;
-        border-radius: 999px;
-        border: 1px solid rgba(255,255,255,0.16);
-        backdrop-filter: blur(8px);
-        font-size: 0.92rem;
-    }
-
-    .summary-pill {
-        background: #eff6ff;
-        color: #1e3a8a;
-        border-color: #bfdbfe;
-    }
-
-    .frameworks-panel,
-    .workspace-panel,
-    .report-panel,
-    .queue-context {
-        background: rgba(255,255,255,0.94);
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
-        border: 1px solid #e2e8f0;
-    }
-
-    .frameworks-toolbar .form-control,
-    .frameworks-toolbar .input-group-text,
-    .workspace-panel .form-control,
-    .workspace-panel .form-select {
-        border-color: #dbe4f0;
-    }
-
-    .btn-filter {
-        border-radius: 999px;
-        padding: 0.6rem 1rem;
-        border: 1px solid #dbe4f0;
-        background: #fff;
-        color: #475569;
-        font-weight: 600;
-    }
-
-    .btn-filter:hover,
-    .btn-filter.active {
-        background: #0f172a;
-        border-color: #0f172a;
-        color: #fff;
-    }
-
-    .framework-shell {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .framework-shell:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.10) !important;
-    }
-
-    .framework-icon {
-        width: 3.5rem;
-        height: 3.5rem;
-        border-radius: 1rem;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.65rem;
-    }
-
-    .framework-outcome,
-    .queue-empty,
-    .final-report-preview {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-    }
-
-    .queue-empty {
-        border-style: dashed;
-    }
-
-    .framework-step,
-    .queue-item {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        gap: 1rem;
-        align-items: center;
-        padding: 1rem 1.1rem;
-        border-radius: 1rem;
-        border: 1px solid #e2e8f0;
-        background: #fff;
-    }
-
-    .queue-item.active {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-    }
-
-    .queue-item.completed {
-        border-color: #16a34a;
-        background: #f0fdf4;
-    }
-
-    .queue-item.pending {
-        border-style: dashed;
-    }
-
-    .queue-item-controls {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        gap: 0.5rem;
-    }
-
-    .step-number,
-    .queue-badge-number {
-        width: 2rem;
-        height: 2rem;
-        border-radius: 999px;
-        background: #e2e8f0;
-        color: #0f172a;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 0.95rem;
-        flex-shrink: 0;
-    }
-
-    .framework-step h3,
-    .queue-item h3 {
-        margin: 0 0 0.2rem;
-        font-size: 1rem;
-        font-weight: 700;
-        color: #0f172a;
-    }
-
-    .framework-step p,
-    .queue-item p {
-        margin: 0;
-        font-size: 0.92rem;
-        color: #64748b;
-    }
-
-    .final-report-preview {
-        padding: 1rem;
-        min-height: 320px;
-        white-space: pre-wrap;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    }
-
-    .framework-card.is-hidden {
-        display: none;
-    }
-
-    @media (max-width: 991.98px) {
-        .framework-step,
-        .queue-item {
-            grid-template-columns: auto 1fr;
-        }
-
-        .framework-step .btn,
-        .queue-item .btn,
-        .queue-item-controls {
-            grid-column: 1 / -1;
-            width: 100%;
-        }
-
-        .framework-meta {
-            text-align: left !important;
-        }
-    }
-</style>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const FRAMEWORK_DEFINITIONS = {

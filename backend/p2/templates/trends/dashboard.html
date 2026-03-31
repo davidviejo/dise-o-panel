@@ -2,9 +2,9 @@
 
 {% block title %}Trends Dashboard | MediaFlow SEO Suite{% endblock %}
 
-{% block content %}
-<div class="container-fluid px-3 px-lg-4 py-4">
-  <style>
+
+{% block page_styles %}
+<style>
     .tm-shell {
       min-height: calc(100vh - 120px);
       background: #f8fafc;
@@ -209,6 +209,11 @@
       .tm-header { flex-direction: column; align-items: flex-start; }
     }
   </style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+  
 
   <div class="tm-shell">
     <div class="tm-app">

@@ -147,6 +147,42 @@
         .btn, button, [type="button"], [type="submit"] {
             border-radius: 999px;
         }
+        .btn {
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            border: 1px solid transparent;
+            transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(18, 69, 185, 0.12);
+        }
+        .btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(18, 69, 185, 0.18);
+        }
+
+        .badge {
+            border-radius: 999px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .card {
+            border-radius: 1rem !important;
+            border: 1px solid rgba(195, 197, 217, 0.45) !important;
+            box-shadow: 0 8px 20px rgba(25, 28, 29, 0.05) !important;
+            background: #fff;
+        }
+        .card-header {
+            border-bottom: 1px solid rgba(195, 197, 217, 0.45);
+            background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+        }
+
+        .alert {
+            border-radius: 1rem;
+            border: 1px solid rgba(195, 197, 217, 0.45);
+        }
 
         .table, table {
             border-collapse: separate;
@@ -163,9 +199,39 @@
         .table td, .table th, table td, table th {
             border-color: rgba(195, 197, 217, 0.4) !important;
         }
+        .table tbody tr:hover td {
+            background: #f8fbff;
+        }
+
+        .nav-tabs {
+            border-bottom-color: rgba(195, 197, 217, 0.5);
+        }
+        .nav-tabs .nav-link {
+            border: 1px solid transparent;
+            border-radius: 0.8rem 0.8rem 0 0;
+            color: #4b5563;
+            font-weight: 700;
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--color-primary);
+            background: #fff;
+            border-color: rgba(195, 197, 217, 0.6) rgba(195, 197, 217, 0.6) #fff;
+        }
+
+        .modal-content {
+            border-radius: 1rem;
+            border: 1px solid rgba(195, 197, 217, 0.5);
+            box-shadow: var(--soft-shadow);
+        }
 
         /* Fix Bootstrap container causing horizontal scroll sometimes */
         .container-fluid { padding-left: 0; padding-right: 0; overflow-x: hidden; }
+        .container-fluid > h1,
+        .container-fluid > h2,
+        .container-fluid > h3 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: -0.01em;
+        }
 
         /* Animations */
         @keyframes fadeIn {
@@ -189,6 +255,7 @@
             animation-delay: 2s;
         }
     </style>
+    {% block page_styles %}{% endblock %}
 </head>
 <body class="bg-slate-50 text-slate-900 overflow-hidden">
 

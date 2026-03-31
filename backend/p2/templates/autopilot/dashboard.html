@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
-{% block content %}
+
+{% block page_styles %}
 <style>
     /* Estilos PDF-Like para el reporte */
     .report-card { border: 1px solid #e3e6f0; border-radius: 8px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }
@@ -20,6 +21,9 @@
     .tree-h3 { border-left-color: #f6c23e; margin-left: 40px; }
     .tree-h4 { border-left-color: #e74a3b; margin-left: 60px; }
 </style>
+{% endblock %}
+
+{% block content %}
 
 <div class="container-fluid p-4">
     <!-- Controles Superiores -->
