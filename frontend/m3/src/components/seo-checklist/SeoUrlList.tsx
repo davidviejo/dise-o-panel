@@ -234,6 +234,29 @@ export const SeoUrlList: React.FC<Props> = ({
     XLSX.writeFile(wb, `SEO_Checklist_Export_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
+  const buildAnalysisConfig = (): AnalysisConfigPayload => {
+    const currentLimits = {
+      maxKeywordsPerUrl: Math.min(
+        settings.serp.maxKeywordsPerUrl,
+        capabilities?.limits.maxKeywordsPerUrl ?? Infinity,
+      ),
+      maxCompetitorsPerKeyword: Math.min(
+        settings.serp.maxCompetitorsPerKeyword,
+        capabilities?.limits.maxCompetitorsPerKeyword ?? Infinity,
+      ),
+    };
+
+    return {
+      mode: analysisMode,
+      serp: {
+        ...settings.serp,
+        ...currentLimits,
+        confirmed: analysisMode === 'advanced',
+      },
+      budgets: settings.budgets,
+    };
+  };
+
   // Selection Logic
   const toggleSelectAll = () => {
     if (selectedIds.size === filteredPages.length && filteredPages.length > 0) {
@@ -265,26 +288,7 @@ export const SeoUrlList: React.FC<Props> = ({
     // Default concurrency or derived from somewhere? Using 3 as safe default
     const concurrency = 3;
 
-    const currentLimits = {
-      maxKeywordsPerUrl: Math.min(
-        settings.serp.maxKeywordsPerUrl,
-        capabilities?.limits.maxKeywordsPerUrl ?? Infinity,
-      ),
-      maxCompetitorsPerKeyword: Math.min(
-        settings.serp.maxCompetitorsPerKeyword,
-        capabilities?.limits.maxCompetitorsPerKeyword ?? Infinity,
-      ),
-    };
-
-    const analysisConfig = {
-      mode: analysisMode,
-      serp: {
-        ...settings.serp,
-        ...currentLimits,
-        confirmed: analysisMode === 'advanced',
-      },
-      budgets: settings.budgets,
-    };
+    const analysisConfig = buildAnalysisConfig();
 
     try {
       await runBatchWithConcurrency(
@@ -297,7 +301,7 @@ export const SeoUrlList: React.FC<Props> = ({
         concurrency,
         (progress) => setBatchProgress(progress),
         // Cost estimator for batch processor (optional, heuristic)
-        (page) => {
+        () => {
           if (settings.serp.enabled && analysisMode === 'advanced') {
             let cost = 0;
             if (
@@ -324,34 +328,24 @@ export const SeoUrlList: React.FC<Props> = ({
     }
   };
 
-  const handleServerBatch = () => {
-    if (!onRunBatch || selectedIds.size === 0) return;
+  const handleServerBatch = (forcedIds?: Set<string>) => {
+    if (!onRunBatch) return false;
+    const idsToAnalyze = forcedIds ?? selectedIds;
+    if (idsToAnalyze.size === 0) return false;
 
-    const pagesToAnalyze = pages.filter((p) => selectedIds.has(p.id));
-
-    const currentLimits = {
-      maxKeywordsPerUrl: Math.min(
-        settings.serp.maxKeywordsPerUrl,
-        capabilities?.limits.maxKeywordsPerUrl ?? Infinity,
-      ),
-      maxCompetitorsPerKeyword: Math.min(
-        settings.serp.maxCompetitorsPerKeyword,
-        capabilities?.limits.maxCompetitorsPerKeyword ?? Infinity,
-      ),
-    };
-
-    const analysisConfig: AnalysisConfigPayload = {
-      mode: analysisMode,
-      serp: {
-        ...settings.serp,
-        ...currentLimits,
-        confirmed: analysisMode === 'advanced',
-      },
-      budgets: settings.budgets,
-    };
+    const pagesToAnalyze = pages.filter((p) => idsToAnalyze.has(p.id));
+    const analysisConfig = buildAnalysisConfig();
 
     onRunBatch(pagesToAnalyze, analysisConfig);
     setSelectedIds(new Set());
+    return true;
+  };
+
+  const runPreferredBatch = (forcedIds?: Set<string>) => {
+    const handledByServer = handleServerBatch(forcedIds);
+    if (!handledByServer) {
+      executeBatch(forcedIds);
+    }
   };
 
   const handleBulkAnalyze = () => {
@@ -360,7 +354,7 @@ export const SeoUrlList: React.FC<Props> = ({
     if (analysisMode === 'advanced') {
       setIsConfirmModalOpen(true);
     } else {
-      executeBatch();
+      runPreferredBatch();
     }
   };
 
@@ -370,7 +364,7 @@ export const SeoUrlList: React.FC<Props> = ({
     setSelectedIds(allIds);
 
     if (analysisMode === 'basic') {
-      executeBatch(allIds);
+      runPreferredBatch(allIds);
       return;
     }
 
@@ -414,7 +408,11 @@ export const SeoUrlList: React.FC<Props> = ({
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium shadow-lg shadow-blue-500/20 transition-all shrink-0"
         >
           {isAnalyzing ? <Loader2 className="animate-spin" size={18} /> : <Zap size={18} />}
-          <span className="hidden sm:inline">Analizar Todo ({filteredPages.length})</span>
+          <span className="hidden sm:inline">
+            {onRunBatch
+              ? `Analizar Todo en servidor (${filteredPages.length})`
+              : `Analizar Todo (${filteredPages.length})`}
+          </span>
         </button>
         <button
           onClick={() => setIsSettingsOpen(true)}
@@ -443,7 +441,7 @@ export const SeoUrlList: React.FC<Props> = ({
       <BatchAnalysisConfirmationModal
         isOpen={isConfirmModalOpen}
         onClose={() => setIsConfirmModalOpen(false)}
-        onConfirm={executeBatch}
+        onConfirm={runPreferredBatch}
         selectedCount={selectedIds.size}
         settings={settings}
         capabilities={capabilities}
@@ -507,7 +505,13 @@ export const SeoUrlList: React.FC<Props> = ({
               }`}
             >
               {isAnalyzing ? <Loader2 className="animate-spin" size={14} /> : <Play size={14} />}
-              {analysisMode === 'advanced' ? 'Analizar (Avanzado)' : 'Analizar'}
+              {analysisMode === 'advanced'
+                ? onRunBatch
+                  ? 'Analizar (Avanzado · Servidor)'
+                  : 'Analizar (Avanzado)'
+                : onRunBatch
+                  ? 'Analizar (Servidor)'
+                  : 'Analizar'}
             </button>
 
             {onRunBatch && (
@@ -517,7 +521,7 @@ export const SeoUrlList: React.FC<Props> = ({
                 className="flex items-center gap-2 px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg transition-colors disabled:opacity-50"
               >
                 <Server size={14} />
-                Run Batch Analysis
+                Enviar al servidor (BatchJobMonitor)
               </button>
             )}
 
