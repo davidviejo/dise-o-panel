@@ -65,6 +65,12 @@ export interface BatchJobStatus {
   error?: string;
 }
 
+export interface RunnerHealth {
+  started: boolean;
+  thread_alive: boolean;
+  thread_name?: string | null;
+}
+
 export interface BatchJobItem {
   itemId: string; // correlates to pageId
   status: 'pending' | 'paused' | 'processing' | 'done' | 'error';
@@ -283,5 +289,13 @@ export const getBatchJobItemResult = async (
     return await engineHttpClient.get<AnalysisResponse>(endpoints.engine.jobItemResult(jobId, itemId));
   } catch (error) {
     throw buildError(error, 'Failed to get item result');
+  }
+};
+
+export const getRunnerHealth = async (): Promise<RunnerHealth> => {
+  try {
+    return await engineHttpClient.get<RunnerHealth>(endpoints.engine.runnerHealth());
+  } catch (error) {
+    throw buildError(error, 'Failed to get runner health');
   }
 };
