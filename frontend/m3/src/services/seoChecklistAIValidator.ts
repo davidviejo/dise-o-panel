@@ -1,19 +1,8 @@
-import { ChecklistKey, ChecklistStatus, normalizeChecklistStatus, SeoPage } from '../types/seoChecklist';
+import { ChecklistKey, ChecklistStatus, SeoPage } from '../types/seoChecklist';
 import { SettingsRepository } from './settingsRepository';
 import { buildPendingChecks } from '../utils/seoChecklistAiValidation';
 import { runChecklistHeuristics } from '../utils/checklistAiHeuristics';
-
-interface AiValidationResult {
-  key: ChecklistKey;
-  status: ChecklistStatus;
-  notes: string;
-  error?: string;
-}
-
-interface AiValidationResponse {
-  results: AiValidationResult[];
-  globalErrors?: string[];
-}
+import { analyzeChecklistWithAI, ChecklistAiDecision, ChecklistAiEvaluateResponse } from './checklistAiClient';
 
 export interface SeoChecklistAiSummary {
   updatedChecks: Array<{ key: ChecklistKey; status: ChecklistStatus; notes: string }>;
@@ -45,15 +34,10 @@ const resolveProvider = () => {
   return null;
 };
 
-const parseAiResponse = (raw: string): AiValidationResponse => {
-  const sanitized = raw.replace(/^```json\s*/i, '').replace(/```$/i, '').trim();
-  return JSON.parse(sanitized) as AiValidationResponse;
-};
-
-const coerceStatus = (status: string): ChecklistStatus => {
-  const normalized = normalizeChecklistStatus(status);
-  if (normalized === 'SI') return 'SI_IA';
-  return normalized;
+const decisionToStatus = (decision: ChecklistAiDecision): ChecklistStatus | null => {
+  if (decision === 'si_ia') return 'SI_IA';
+  if (decision === 'error_claro_ia') return 'ERROR_CLARO_IA';
+  return null;
 };
 
 export const validateChecklistWithAI = async (page: SeoPage): Promise<SeoChecklistAiSummary> => {
@@ -92,68 +76,21 @@ export const validateChecklistWithAI = async (page: SeoPage): Promise<SeoCheckli
     autoData: item.autoData || null,
   }));
 
-  const prompt = `Eres un auditor SEO senior. Evalúa los checks y responde SOLO JSON válido.
-
-URL: ${page.url}
-Keyword principal: ${page.kwPrincipal || 'N/A'}
-Tipo de página: ${page.pageType}
-
-Checks pendientes (ordenados por prioridad alta > media > baja):
-${JSON.stringify(checksPayload, null, 2)}
-
-Reglas:
-1) No incluyas checks fuera de la lista.
-2) Devuelve status recomendado por check usando SOLO: SI_IA, PARCIAL, NO, ERROR_CLARO_IA, NA.
-3) Si detectas un error técnico claro, usa ERROR_CLARO_IA y explica el error en "error".
-4) notes debe ser concreto y accionable (máx. 180 caracteres).
-5) Si no hay suficiente evidencia, usa PARCIAL o NA, nunca inventes.
-
-Formato de salida:
-{
-  "results": [
-    {"key": "CONTENIDOS", "status": "PARCIAL", "notes": "...", "error": "... opcional"}
-  ],
-  "globalErrors": ["... opcional ..."]
-}`;
-
-  let rawResponse = '';
-  if (provider.provider === 'openai') {
-    const { default: OpenAI } = await import('openai');
-    const client = new OpenAI({ apiKey: provider.apiKey, dangerouslyAllowBrowser: true });
-    const response = await client.chat.completions.create({
-      model: provider.model,
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.1,
-    });
-    rawResponse = response.choices[0]?.message?.content || '';
-  } else if (provider.provider === 'gemini') {
-    const { GoogleGenAI } = await import('@google/genai');
-    const client = new GoogleGenAI({ apiKey: provider.apiKey });
-    const response = await client.models.generateContent({
-      model: provider.model,
-      contents: prompt,
-    });
-    rawResponse = response.text || '';
-  } else {
-    const { Mistral } = await import('@mistralai/mistralai');
-    const client = new Mistral({ apiKey: provider.apiKey });
-    const response = await client.chat.complete({
-      model: provider.model,
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.1,
-    });
-    rawResponse = (response.choices?.[0]?.message?.content as string) || '';
-  }
-
-  if (!rawResponse) {
-    throw new Error('La IA no devolvió respuesta.');
-  }
-
-  let parsed: AiValidationResponse;
+  let parsed: ChecklistAiEvaluateResponse;
   try {
-    parsed = parseAiResponse(rawResponse);
-  } catch {
-    throw new Error('La respuesta de IA no pudo parsearse como JSON válido.');
+    parsed = await analyzeChecklistWithAI({
+      provider: provider.provider,
+      apiKey: provider.apiKey,
+      model: provider.model,
+      context: {
+        url: page.url,
+        kwPrincipal: page.kwPrincipal || '',
+        pageType: page.pageType || '',
+      },
+      checks: checksPayload,
+    });
+  } catch (error) {
+    throw new Error((error as Error).message || 'La respuesta de IA no valida el esquema requerido.');
   }
 
   const pendingByKey = new Map(heuristicRun.pendingForAI.map((item) => [item.key, item]));
@@ -161,12 +98,12 @@ Formato de salida:
     .filter((item) => pendingByKey.has(item.key))
     .map((item) => ({
       key: item.key,
-      status: coerceStatus(item.status),
+      status: decisionToStatus(item.decision),
       notes: (item.notes || '').trim(),
       error: (item.error || '').trim(),
     }))
-    .filter((item) => item.status !== 'NA' || item.notes.length > 0)
-    .map(({ key, status, notes }) => ({ key, status, notes }));
+    .filter((item) => item.status && item.notes.length > 0)
+    .map(({ key, status, notes }) => ({ key, status: status as ChecklistStatus, notes }));
 
   const detectedErrors = [
     ...(parsed.globalErrors || []),
