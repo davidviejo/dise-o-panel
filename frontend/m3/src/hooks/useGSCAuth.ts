@@ -54,31 +54,55 @@ export const useGSCAuth = () => {
     }
 
     if (window.google) {
-      const client = window.google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
-        scope:
-          'https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
-        callback: async (tokenResponse: any) => {
-          if (tokenResponse.access_token) {
-            const token = tokenResponse.access_token;
-            setGscAccessToken(token);
-            localStorage.setItem('mediaflow_gsc_token', token);
-
-            try {
-              const userInfo = await getUserInfo(token);
-              setGoogleUser(userInfo);
-              showSuccess(`Bienvenido, ${userInfo.name}`);
-              if (onSuccess) onSuccess(token);
-            } catch (e) {
-              console.error(e);
-              showError('Error conectando con Search Console.');
+      try {
+        const client = window.google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope:
+            'https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
+          callback: async (tokenResponse: any) => {
+            if (tokenResponse.error) {
+              console.error('GSC OAuth callback error', tokenResponse);
+              showError(
+                `No se pudo completar la autorización de Google (${tokenResponse.error}${
+                  tokenResponse.error_description
+                    ? `: ${tokenResponse.error_description}`
+                    : ''
+                }).`,
+              );
+              return;
             }
-          } else {
-            showError('No se pudo obtener el token de acceso.');
-          }
-        },
-      });
-      client.requestAccessToken();
+
+            if (tokenResponse.access_token) {
+              const token = tokenResponse.access_token;
+              setGscAccessToken(token);
+              localStorage.setItem('mediaflow_gsc_token', token);
+
+              try {
+                const userInfo = await getUserInfo(token);
+                setGoogleUser(userInfo);
+                showSuccess(`Bienvenido, ${userInfo.name}`);
+                if (onSuccess) onSuccess(token);
+              } catch (e) {
+                console.error(e);
+                setGscAccessToken(null);
+                setGoogleUser(null);
+                localStorage.removeItem('mediaflow_gsc_token');
+                showError(
+                  'No se pudo validar tu cuenta de Google Search Console. Intenta iniciar sesión nuevamente.',
+                );
+              }
+            } else {
+              showError('No se pudo obtener el token de acceso.');
+            }
+          },
+        });
+        client.requestAccessToken();
+      } catch (error) {
+        console.error('GSC OAuth init error', error);
+        showError(
+          'No se pudo iniciar OAuth de Google. Revisa tu Client ID y que el dominio actual esté en Authorized JavaScript origins.',
+        );
+      }
     } else {
       showError('La librería de Google Identity no ha cargado aún. Recarga la página.');
     }
