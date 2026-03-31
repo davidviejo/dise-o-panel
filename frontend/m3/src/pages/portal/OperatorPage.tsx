@@ -6,6 +6,7 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { OperatorShell } from '../../components/shell/ShellVariants';
+import { Input } from '../../components/ui/Input';
 
 const OperatorPage: React.FC = () => {
   const [password, setPassword] = useState('');
@@ -102,31 +103,31 @@ const OperatorPage: React.FC = () => {
 
   return (
     <OperatorShell contentClassName="flex min-h-screen items-center justify-center px-4">
-      <Card className="w-full max-w-md border-slate-700 bg-slate-800 p-8 shadow-xl">
+      <Card className="w-full max-w-md border-border bg-surface-container p-8 shadow-xl">
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4 text-green-400">
             <Terminal className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Operator Access</h1>
+          <h1 className="text-2xl font-bold text-foreground">Operator Access</h1>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">
+            <label className="block text-sm font-medium text-muted mb-2">
               Security Clearance
             </label>
-            <input
+            <Input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg bg-slate-900 border border-slate-600 text-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all outline-none"
+              className="bg-surface-container-high py-3"
               placeholder="••••••••"
               required
             />
           </div>
 
           {error && (
-            <div className="bg-red-900/20 text-red-400 px-4 py-3 rounded-lg text-sm border border-red-900/50">
+            <div className="rounded-lg border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-danger">
               {error}
             </div>
           )}

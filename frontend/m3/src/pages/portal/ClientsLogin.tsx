@@ -5,6 +5,7 @@ import { ArrowLeft, Lock } from 'lucide-react';
 import { PortalShell } from '../../components/shell/ShellVariants';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
 
 const ClientsLogin: React.FC = () => {
   const [password, setPassword] = useState('');
@@ -38,25 +39,25 @@ const ClientsLogin: React.FC = () => {
           <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600">
             <Lock className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Área de Clientes</h1>
-          <p className="text-slate-500 mt-2">Introduce la contraseña global para acceder.</p>
+          <h1 className="text-2xl font-bold text-foreground">Área de Clientes</h1>
+          <p className="mt-2 text-muted">Introduce la contraseña global para acceder.</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Contraseña</label>
-            <input
+            <label className="mb-2 block text-sm font-medium text-foreground">Contraseña</label>
+            <Input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+              className="py-3"
               placeholder="••••••••"
               required
             />
           </div>
 
           {error && (
-            <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm flex items-center">
+            <div className="rounded-lg border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-danger flex items-center">
               <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
               {error}
             </div>
@@ -75,7 +76,7 @@ const ClientsLogin: React.FC = () => {
           <Button
             onClick={() => navigate('/')}
             variant="ghost"
-            className="text-sm text-slate-500 hover:text-slate-700"
+            className="text-sm text-muted"
           >
             <ArrowLeft className="h-4 w-4" /> Volver al inicio
           </Button>

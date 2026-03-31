@@ -5,6 +5,7 @@ import { ArrowLeft, Key } from 'lucide-react';
 import { PortalShell } from '../../components/shell/ShellVariants';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
 
 const ProjectLogin: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -41,29 +42,29 @@ const ProjectLogin: React.FC = () => {
           <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 text-purple-600">
             <Key className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Acceso a Proyecto</h1>
-          <p className="text-slate-500 mt-2">
-            Proyecto: <span className="font-semibold text-slate-700">{slug}</span>
+          <h1 className="text-2xl font-bold text-foreground">Acceso a Proyecto</h1>
+          <p className="text-muted mt-2">
+            Proyecto: <span className="font-semibold text-foreground">{slug}</span>
           </p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Clave del Proyecto
             </label>
-            <input
+            <Input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none"
+              className="py-3 focus:ring-primary/20"
               placeholder="••••••••"
               required
             />
           </div>
 
           {error && (
-            <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm flex items-center">
+            <div className="rounded-lg border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-danger flex items-center">
               <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
               {error}
             </div>
@@ -81,7 +82,7 @@ const ProjectLogin: React.FC = () => {
           <Button
             onClick={() => navigate('/clientes')}
             variant="ghost"
-            className="text-sm text-slate-500 hover:text-slate-700"
+            className="text-sm text-muted"
           >
             <ArrowLeft className="h-4 w-4" /> Volver a lista de clientes
           </Button>

@@ -296,19 +296,19 @@ export const AutoAssignKeywordsPanel: React.FC<Props> = ({ pages, onBulkUpdate }
   return (
     <Card className="space-y-4">
       <div>
-        <h2 className="text-lg font-semibold text-slate-900">Autoasignación de KWs</h2>
-        <p className="text-sm text-slate-600">
+        <h2 className="text-lg font-semibold text-foreground">Autoasignación de KWs</h2>
+        <p className="text-sm text-muted">
           Propone y asigna solo keywords principales usando las queries disponibles de GSC.
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm font-semibold text-slate-700">Fuente</label>
+          <label className="mb-1 block text-sm font-semibold text-foreground">Fuente</label>
           <select
             value={sourceMode}
             onChange={(event) => setSourceMode(event.target.value as KeywordSourceMode)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="form-control"
           >
             <option value="without_kw">Solo URLs sin KW principal</option>
             <option value="with_gsc">Solo URLs con datos de GSC</option>
@@ -330,11 +330,11 @@ export const AutoAssignKeywordsPanel: React.FC<Props> = ({ pages, onBulkUpdate }
         </Button>
       </div>
 
-      {status && <p className="text-sm text-slate-600">{status}</p>}
+      {status && <p className="text-sm text-muted">{status}</p>}
 
-      <div className="overflow-x-auto rounded-lg border border-slate-200">
+      <div className="overflow-x-auto rounded-brand-md border border-border bg-surface-container-lowest">
         <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-slate-600">
+          <thead className="bg-surface-container-low text-muted">
             <tr>
               <th className="px-3 py-2">URL</th>
               <th className="px-3 py-2">KW actual</th>
@@ -346,20 +346,20 @@ export const AutoAssignKeywordsPanel: React.FC<Props> = ({ pages, onBulkUpdate }
           </thead>
           <tbody>
             {proposals.map((proposal) => (
-              <tr key={proposal.id} className="border-t border-slate-100">
-                <td className="px-3 py-2 text-xs text-slate-700">{proposal.url}</td>
-                <td className="px-3 py-2 text-slate-600">{proposal.currentKeyword || '-'}</td>
-                <td className="px-3 py-2 font-medium text-slate-900">{proposal.proposedKeyword}</td>
-                <td className="px-3 py-2 capitalize text-slate-600">{proposal.confidence}</td>
-                <td className="px-3 py-2 text-slate-600">
+              <tr key={proposal.id} className="border-t border-border/60">
+                <td className="px-3 py-2 text-xs text-foreground">{proposal.url}</td>
+                <td className="px-3 py-2 text-muted">{proposal.currentKeyword || '-'}</td>
+                <td className="px-3 py-2 font-medium text-foreground">{proposal.proposedKeyword}</td>
+                <td className="px-3 py-2 capitalize text-muted">{proposal.confidence}</td>
+                <td className="px-3 py-2 text-muted">
                   {proposal.gscClicks} clics / {proposal.gscImpressions} imp.
                 </td>
-                <td className="px-3 py-2 text-slate-600">{proposal.reason}</td>
+                <td className="px-3 py-2 text-muted">{proposal.reason}</td>
               </tr>
             ))}
             {proposals.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-3 py-8 text-center text-slate-500">
+                <td colSpan={6} className="px-3 py-8 text-center text-muted">
                   No hay propuestas de keyword con los filtros actuales.
                 </td>
               </tr>

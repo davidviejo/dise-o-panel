@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle, DollarSign, Check } from 'lucide-react';
 import { SeoChecklistSettings, Capabilities } from '../../types/seoChecklist';
+import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
 
 interface Props {
   isOpen: boolean;
@@ -69,17 +71,17 @@ export const BatchAnalysisConfirmationModal: React.FC<Props> = ({
     (needsConfirmation && !confirmed) || isOverBudget || isOverDaily || (isAdvancedMode && !providerAvailable);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col">
-        <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <DollarSign className="text-emerald-500" />
+    <div className="overlay-backdrop" onClick={onClose}>
+      <Card className="w-full max-w-md flex flex-col p-0" onClick={(e) => e.stopPropagation()}>
+        <div className="p-6 border-b border-border bg-surface-container-low">
+          <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <DollarSign className="text-success" />
             Confirmar Análisis en Lote
           </h3>
         </div>
 
         <div className="p-6 space-y-4">
-          <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+          <div className="space-y-2 text-sm text-muted">
             <div className="flex justify-between">
               <span>URLs seleccionadas:</span>
               <span className="font-medium">{selectedCount}</span>
@@ -89,11 +91,11 @@ export const BatchAnalysisConfirmationModal: React.FC<Props> = ({
               <span className="font-medium">{estimatedKeywords}</span>
             </div>
             {!isAdvancedMode ? (
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-emerald-600 dark:text-emerald-400 font-medium">
+              <div className="pt-2 border-t border-border text-success font-medium">
                 Análisis básico sin coste SERP
               </div>
             ) : (
-              <div className="flex justify-between text-base font-semibold pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex justify-between text-base font-semibold pt-2 border-t border-border">
                 <span>Coste Estimado:</span>
                 <span
                   className={
@@ -109,7 +111,7 @@ export const BatchAnalysisConfirmationModal: React.FC<Props> = ({
           </div>
 
           {isAdvancedMode && !providerAvailable && (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 rounded-xl text-sm flex items-start gap-3">
+            <div className="p-4 bg-danger-soft text-danger rounded-xl text-sm flex items-start gap-3 border border-danger/20">
               <AlertTriangle size={18} className="shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold">Proveedor No Disponible</p>
@@ -121,7 +123,7 @@ export const BatchAnalysisConfirmationModal: React.FC<Props> = ({
           )}
 
           {isAdvancedMode && providerAvailable && (isOverBudget || isOverDaily) && (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 rounded-xl text-sm flex items-start gap-3">
+            <div className="p-4 bg-danger-soft text-danger rounded-xl text-sm flex items-start gap-3 border border-danger/20">
               <AlertTriangle size={18} className="shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold">Presupuesto Excedido</p>
@@ -138,14 +140,14 @@ export const BatchAnalysisConfirmationModal: React.FC<Props> = ({
           )}
 
           {needsConfirmation && (
-            <label className="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl cursor-pointer border border-slate-200 dark:border-slate-700">
+            <label className="flex items-start gap-3 p-4 bg-surface-container-low rounded-xl cursor-pointer border border-border">
               <input
                 type="checkbox"
                 checked={confirmed}
                 onChange={(e) => setConfirmed(e.target.checked)}
-                className="mt-1 text-emerald-600 focus:ring-emerald-500"
+                className="mt-1 text-success focus:ring-success"
               />
-              <span className="text-sm text-slate-700 dark:text-slate-300">
+              <span className="text-sm text-foreground">
                 Confirmo ejecutar el análisis con un coste estimado de{' '}
                 <strong>€{estimatedCost.toFixed(3)}</strong>.
               </span>
@@ -153,30 +155,25 @@ export const BatchAnalysisConfirmationModal: React.FC<Props> = ({
           )}
         </div>
 
-        <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 rounded-b-2xl">
+        <div className="p-6 border-t border-border bg-surface-container-low rounded-b-2xl">
           {needsConfirmation && !confirmed && (
-            <p className="mb-3 text-xs text-amber-600 dark:text-amber-400 text-right">
+            <p className="mb-3 text-xs text-warning text-right">
               Marca la confirmación para continuar
             </p>
           )}
           <div className="flex justify-end gap-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
+            <Button onClick={onClose} variant="secondary">Cancelar</Button>
+            <Button
               onClick={onConfirm}
               disabled={isConfirmDisabled}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="bg-success text-on-primary hover:bg-success/90"
             >
               <Check size={18} />
               Ejecutar
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };
