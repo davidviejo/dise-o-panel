@@ -38,13 +38,13 @@ const normalizeQueryRow = (row: any) => {
   };
 };
 
-const getBestKeywordFromPage = (page: SeoPage) => {
+export const getKeywordCandidatesFromPage = (page: SeoPage) => {
   const rawQueries = page.checklist.OPORTUNIDADES?.autoData?.gscQueries;
   if (!Array.isArray(rawQueries) || rawQueries.length === 0) {
-    return null;
+    return [];
   }
 
-  const sorted = rawQueries
+  return rawQueries
     .map(normalizeQueryRow)
     .filter((query: any) => isUsableKeyword(query.query))
     .sort((a: any, b: any) => {
@@ -52,9 +52,16 @@ const getBestKeywordFromPage = (page: SeoPage) => {
       if (b.impressions !== a.impressions) return b.impressions - a.impressions;
       return a.position - b.position;
     });
+};
 
-  if (sorted.length === 0) return null;
-  const best = sorted[0];
+export const getBestKeywordFromPage = (page: SeoPage, blockedKeywords: Set<string>) => {
+  const candidates = getKeywordCandidatesFromPage(page);
+  const best =
+    candidates.find(
+      (candidate: any) => !blockedKeywords.has(candidate.query.trim().toLowerCase()),
+    ) || null;
+  if (!best) return null;
+
   return {
     keyword: best.query.trim(),
     clicks: best.clicks,
@@ -68,6 +75,11 @@ export const AutoAssignKeywordsPanel: React.FC<Props> = ({ pages, onBulkUpdate }
   const [isLoadingGsc, setIsLoadingGsc] = useState(false);
 
   const proposals = useMemo<KeywordProposal[]>(() => {
+    const pagesWithUsableKeyword = pages.filter((page) => isUsableKeyword(page.kwPrincipal));
+    const globallyAssignedKeywords = new Set(
+      pagesWithUsableKeyword.map((page) => page.kwPrincipal.trim().toLowerCase()),
+    );
+
     return pages
       .filter((page) => {
         if (sourceMode === 'with_gsc') {
@@ -80,7 +92,12 @@ export const AutoAssignKeywordsPanel: React.FC<Props> = ({ pages, onBulkUpdate }
       })
       .map((page) => {
         const currentKeyword = (page.kwPrincipal || '').trim();
-        const suggestion = getBestKeywordFromPage(page);
+        const currentKeywordNormalized = currentKeyword.toLowerCase();
+        const blockedKeywords = new Set(globallyAssignedKeywords);
+        if (currentKeywordNormalized) {
+          blockedKeywords.delete(currentKeywordNormalized);
+        }
+        const suggestion = getBestKeywordFromPage(page, blockedKeywords);
 
         if (page.isBrandKeyword) {
           return {
@@ -102,7 +119,8 @@ export const AutoAssignKeywordsPanel: React.FC<Props> = ({ pages, onBulkUpdate }
             currentKeyword,
             proposedKeyword: '',
             confidence: 'baja' as const,
-            reason: 'Sin queries GSC disponibles en Oportunidades para proponer keyword.',
+            reason:
+              'Sin queries GSC disponibles o todas ya están asignadas como keyword principal en otras URLs.',
             gscClicks: 0,
             gscImpressions: 0,
           };
